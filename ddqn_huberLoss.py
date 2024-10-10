@@ -553,7 +553,7 @@ if __name__ == '__main__':
     observation = env.game.observations
     max_cycles = env.game.get_max_steps() + 4
 
-    num_games = 100
+    num_games = 25000
     load_checkpoint = False
     
     new_batch_size = 32
