@@ -208,7 +208,7 @@ class Agent():
             
             loss.backward()
             
-            max_grad_norm = 2.0  # gradient clipping
+            max_grad_norm = 3.0  # gradient clipping
             utils.clip_grad_norm_(self.q_eval.parameters(), max_grad_norm)
             
             self.q_eval.optimizer.step()
@@ -343,7 +343,7 @@ def plot_event_usage(red_event_count, blue_event_count, n_actions, title, plot_f
     plt.xticks(indices, all_events, rotation=45)
     plt.legend()
     plt.tight_layout()
-    save_dir = '3_25K_DFT_MARL-ddqn_analysisGraphs_huberloss'
+    save_dir = '0_50K_DFT_MARL-ddqn_analysisGraphs_huberloss'
     os.makedirs(save_dir, exist_ok=True)
     file_path = os.path.join(save_dir, plot_filename)
     plt.savefig(file_path, format='png')
@@ -359,7 +359,7 @@ def plot_loss(agent, save_dir, agent_name):
     plt.ylabel("Loss")
 
     # Additional values to display                                                                  ################
-    gradient_clipping = 2
+    gradient_clipping = 3
     dropout = 0.2
     num_layers = 2
     weight_decay = 1e-5
@@ -453,10 +453,10 @@ def play():
     
     new_batch_size = 32
     
-    red_agent = Agent(name="red_agent_3_25K", gamma=0.99, epsilon=0.5, lr=5e-6,
+    red_agent = Agent(name="red_agent_0_50K", gamma=0.99, epsilon=0.5, lr=5e-6,
                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
                       batch_size=new_batch_size, eps_dec=1e-3, replace=100)
-    blue_agent = Agent(name="blue_agent_3_25K", gamma=0.99, epsilon=0.5, lr=5e-6,
+    blue_agent = Agent(name="blue_agent_0_50K", gamma=0.99, epsilon=0.5, lr=5e-6,
                        input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
                        batch_size=new_batch_size, eps_dec=1e-3, replace=100)
     agents = {"red_agent": red_agent, "blue_agent": blue_agent}
@@ -553,17 +553,17 @@ if __name__ == '__main__':
     observation = env.game.observations
     max_cycles = env.game.get_max_steps() + 4
 
-    num_games = 100
+    num_games = 50000
     load_checkpoint = False
     
     new_batch_size = 32
 
-    red_agent = Agent(name="red_agent_3_25K", gamma=0.99, epsilon=0.5, lr=5e-6,
+    red_agent = Agent(name="red_agent_0_50K", gamma=0.99, epsilon=0.5, lr=5e-6,
                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
-                      batch_size=new_batch_size, eps_dec=1e-5, replace=100)
-    blue_agent = Agent(name="blue_agent_3_25K", gamma=0.99, epsilon=0.5, lr=5e-6,
+                      batch_size=new_batch_size, eps_dec=1e-4, replace=100)
+    blue_agent = Agent(name="blue_agent_0_50K", gamma=0.99, epsilon=0.5, lr=5e-6,
                        input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
-                       batch_size=new_batch_size, eps_dec=1e-5, replace=100)
+                       batch_size=new_batch_size, eps_dec=1e-4, replace=100)
     agents = {"red_agent": red_agent, "blue_agent": blue_agent}
     if load_checkpoint:
         for k, v in agents.items():
@@ -620,7 +620,7 @@ if __name__ == '__main__':
             for k, v in agents.items():
                 v.save_models()
                 
-    save_dir = '3_25K_DFT_MARL-ddqn_analysisGraphs_huberloss'
+    save_dir = '0_50K_DFT_MARL-ddqn_analysisGraphs_huberloss'
     plot_loss(red_agent, save_dir, "red_agent")
     plot_loss(blue_agent, save_dir, "blue_agent")
     plot_loss_avg(red_agent, save_dir, "red_agent")
