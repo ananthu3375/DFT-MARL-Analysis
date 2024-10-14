@@ -20,14 +20,14 @@ import matplotlib.pyplot as plt
 import gym
 
 
-def set_seed(seed):  ####
+def set_seed(seed): 
     random.seed(seed)
     np.random.seed(seed)
     T.manual_seed(seed)
     if T.cuda.is_available():
         T.cuda.manual_seed(seed)
         T.cuda.manual_seed_all(seed)
-    T.backends.cudnn.deterministic = True  # Makes computations deterministic, but can slow down training
+    T.backends.cudnn.deterministic = True 
     T.backends.cudnn.benchmark = False  # Ensures reproducibility
 
 
@@ -94,11 +94,9 @@ class Agent():
         self.learn_step_counter = 0
         self.action_space = [i for i in range(self.n_actions)]
         self.steps_per_episode = []  ###
-        self.rewards_per_episode = []  ###
-        self.loss_history = []  # To store loss values                                                             ###
-        self.epsilon_history = []  ###
-        self.episode_loss = []  # List to store losses for the current episode                                     ###
-        self.episode_losses = []  # List to store average loss per episode                                         ###
+        self.loss_history = []  # To store loss values                                                             
+        self.episode_loss = []  # List to store losses for the current episode                                     
+        self.episode_losses = []  # List to store average loss per episode                                         
         # print("input dimensions,,,,,,,,,,,,,,,,,,",input_dims)
         self.memory = ReplayBuffer(mem_size, len(input_dims))
         self.q_eval = DoubleDeepQNetwork(self.lr, self.n_actions,
@@ -109,8 +107,7 @@ class Agent():
                                          input_dims=self.input_dims,
                                          name=name + 'DoubleDeepQNetwork_q_next',
                                          chkpt_dir=self.chkpt_dir)
-
-        self.training_actions = []  # store actions during training                  ###
+        self.training_actions = []  # store actions during training                  
 
         # random number less than epsilon it takes a random action
         # if the random number is greater than epsilon ot takes a greedy action
@@ -137,19 +134,9 @@ class Agent():
         return action
 
     def store_transition(self, state, action, reward, state_, done):
-
-        # # Convert state to one-hot encoding if needed
-        # state = self.one_hot_encode(state)                                                                                         ###
-        # state_ = self.one_hot_encode(state_)                                                                                       ###
-
         self.memory.store_transition(state, action, reward, state_, done)
         self.training_actions.append(
-            action)  # Track action in training                                                           ###
-
-    # def one_hot_encode(self, action):                                                                                              ###
-    #     one_hot_vector = np.zeros(25)  # Assuming 12 categories
-    #     one_hot_vector[action] = 1
-    #     return one_hot_vector
+            action)  # Track action in training
 
     def replace_target_network(self):
         if self.learn_step_counter % self.replace_target_cnt == 0:
@@ -207,25 +194,20 @@ class Agent():
 
             loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
 
-            # print(f"Training step {self.learn_step_counter}: Loss = {loss.item()}") # To print loss for each step           ###
+            # print(f"Training step {self.learn_step_counter}: Loss = {loss.item()}") # To print loss for each step         
 
-            self.episode_loss.append(
-                loss.item())  # Append the loss value for the current episode                          ###
-
-            self.loss_history.append(
-                loss.item())  # Append the loss value                                                  ###
-            self.epsilon_history.append(
-                self.epsilon)  # Track epsilon                                                      ###
+            self.episode_loss.append(loss.item())  # Append the loss value for the current episode    
+            self.loss_history.append(loss.item())  # Append the loss value                                                                                                   
 
             loss.backward()
 
-            max_grad_norm = 3.0  # gradient clipping                                                                        ###
-            utils.clip_grad_norm_(self.q_eval.parameters(), max_grad_norm)  ###
+            max_grad_norm = 3.0  # gradient clipping                                                                
+            utils.clip_grad_norm_(self.q_eval.parameters(), max_grad_norm)  
 
             self.q_eval.optimizer.step()
             self.learn_step_counter += 1
             self.decrement_epsilon()
-            # print(f"Loss: {loss.item()}")                                                                                                ###
+            # print(f"Loss: {loss.item()}")                                                                                               
 
     def end_of_episode(self):  ###
         # Print average loss for the episode
@@ -244,18 +226,15 @@ class DoubleDeepQNetwork(nn.Module):
         # input_dims =
         # print("..............",len(input_dims))
         self.fcl = nn.Linear(len(input_dims), 512)  ### changed 512 to 1024 hidden layers
-        self.bn1 = nn.BatchNorm1d(
-            512)  # Batch normalization layer                                                         ###
-        self.fc2 = nn.Linear(512,
-                             512)  # New hidden layer                                                                  ###
+        self.bn1 = nn.BatchNorm1d(512)  # Batch normalization layer                                                
+        self.fc2 = nn.Linear(512, 512)  # New hidden layer                                                            
         self.bn2 = nn.BatchNorm1d(512)  ###
-        self.dropout = nn.Dropout(
-            p=0.2)  # Dropout layer with 30% dropout rate                                              ###
+        self.dropout = nn.Dropout(p=0.2)  # Dropout layer with 20% dropout rate                                       
         self.V = nn.Linear(512, 1)  # the value
         self.A = nn.Linear(512, n_actions)  # the advantage of actions, relative value of each action
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=1e-5)  ### weight decay
-        self.loss = nn.SmoothL1Loss()  # Huber loss : Replaced MSELoss with HuberLoss                                        ###
+        self.loss = nn.SmoothL1Loss()  # Huber loss : Replaced MSELoss with HuberLoss                                 
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
 
@@ -265,21 +244,21 @@ class DoubleDeepQNetwork(nn.Module):
         # flat1 = F.relu(self.fcl(state))
         flat1 = F.leaky_relu(self.fcl(state), negative_slope=0.01)  ### Replaced ReLU with Leaky ReLU
         flat1 = self.dropout(
-            flat1)  # Applying dropout                                                                 ###
-        if flat1.size(0) > 1:  ###
-            flat1 = self.bn1(flat1)  ###
+            flat1)  # Applying dropout                                                            
+        if flat1.size(0) > 1:  
+            flat1 = self.bn1(flat1)  
 
         # V = self.V(flat1)
         # A = self.A(flat1)
 
         # Second hidden layer
-        flat2 = F.relu(self.fc2(flat1))  ###
-        flat2 = self.dropout(flat2)  ###
-        if flat2.size(0) > 1:  ###
-            flat2 = self.bn2(flat2)  ###
+        flat2 = F.relu(self.fc2(flat1))  
+        flat2 = self.dropout(flat2)  
+        if flat2.size(0) > 1:  
+            flat2 = self.bn2(flat2)  
 
-        V = self.V(flat2)  ###
-        A = self.A(flat2)  ###
+        V = self.V(flat2)  
+        A = self.A(flat2) 
 
         return V, A
 
@@ -368,37 +347,6 @@ def plot_loss(agent, save_dir, agent_name):
     plt.savefig(save_path)
     plt.clf()
 
-
-# def plot_training_metrics(agent, save_dir):
-#     if not os.path.exists(save_dir):
-#         os.makedirs(save_dir)
-
-#     # Plot rewards per episode
-#     plt.figure(figsize=(10, 6))
-#     plt.plot(agent.rewards_per_episode)
-#     plt.xlabel('Episodes')
-#     plt.ylabel('Rewards')
-#     plt.title(f'{agent.name} - Rewards per Episode')
-#     plt.savefig(os.path.join(save_dir, f'{agent.name}_rewards.png'))
-#     plt.close()
-
-#     # Plot loss curve
-#     plt.figure(figsize=(10, 6))
-#     plt.plot(agent.losses)
-#     plt.xlabel('Training Steps')
-#     plt.ylabel('Loss')
-#     plt.title(f'{agent.name} - Loss over Training')
-#     plt.savefig(os.path.join(save_dir, f'{agent.name}_loss.png'))
-#     plt.close()
-
-#     # Plot epsilon decay
-#     plt.figure(figsize=(10, 6))
-#     plt.plot(agent.epsilon_history)
-#     plt.xlabel('Training Steps')
-#     plt.ylabel('Epsilon')
-#     plt.title(f'{agent.name} - Epsilon Decay')
-#     plt.savefig(os.path.join(save_dir, f'{agent.name}_epsilon.png'))
-#     plt.close()
 
 def plot_loss_avg(agent, save_dir, agent_name):  ####
     plt.figure(figsize=(10, 6))
