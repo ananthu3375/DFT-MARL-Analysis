@@ -61,7 +61,7 @@ class ReplayBuffer():
 
     # for usinform sampling of memory when agent learns
     def sample_buffer(self, batch_size):
-        max_mem = min(self.mem_cntr, self.mem_size)  # so that non filled valyes zeros are not chosen
+        max_mem = min(self.mem_cntr, self.mem_size)  # so that for non filled values zeros are not chosen
         batch = np.random.choice(max_mem, batch_size, replace=False)
 
         states = self.state_memory[batch]
@@ -93,7 +93,7 @@ class Agent():
         self.chkpt_dir = chkpt_dir
         self.learn_step_counter = 0
         self.action_space = [i for i in range(self.n_actions)]
-        self.steps_per_episode = []  ###
+        self.steps_per_episode = []  
         self.loss_history = []  # To store loss values                                                             
         self.episode_loss = []  # List to store losses for the current episode                                     
         self.episode_losses = []  # List to store average loss per episode                                         
@@ -135,8 +135,7 @@ class Agent():
 
     def store_transition(self, state, action, reward, state_, done):
         self.memory.store_transition(state, action, reward, state_, done)
-        self.training_actions.append(
-            action)  # Track action in training
+        self.training_actions.append(action)  # Track action in training
 
     def replace_target_network(self):
         if self.learn_step_counter % self.replace_target_cnt == 0:
