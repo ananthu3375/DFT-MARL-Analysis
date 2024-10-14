@@ -20,14 +20,14 @@ import matplotlib.pyplot as plt
 import gym
 
 
-def set_seed(seed):  ####
+def set_seed(seed):  
     random.seed(seed)
     np.random.seed(seed)
     T.manual_seed(seed)
     if T.cuda.is_available():
         T.cuda.manual_seed(seed)
         T.cuda.manual_seed_all(seed)
-    T.backends.cudnn.deterministic = True  # Makes computations deterministic, but can slow down training
+    T.backends.cudnn.deterministic = True 
     T.backends.cudnn.benchmark = False  # Ensures reproducibility
 
 
@@ -38,10 +38,8 @@ class ReplayBuffer():
         self.mem_size = max_size
         self.mem_cntr = 0  # index of last stored memory
         # print("input shape",input_shape)
-        self.state_memory = np.zeros((self.mem_size, input_shape),
-                                     dtype=np.float32)
-        self.new_state_memory = np.zeros((self.mem_size, input_shape),
-                                         dtype=np.float32)
+        self.state_memory = np.zeros((self.mem_size, input_shape),dtype=np.float32)
+        self.new_state_memory = np.zeros((self.mem_size, input_shape),dtype=np.float32)
         self.action_memory = np.zeros(self.mem_size, dtype=np.int64)
         self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)
         self.terminal_memory = np.zeros(self.mem_size, dtype=np.uint8)  # for done flags
@@ -93,12 +91,12 @@ class Agent():
         self.chkpt_dir = chkpt_dir
         self.learn_step_counter = 0
         self.action_space = [i for i in range(self.n_actions)]
-        self.steps_per_episode = []  ###
-        self.rewards_per_episode = []  ###
-        self.loss_history = []  # To store loss values                                                             ###
-        self.epsilon_history = []  ###
-        self.episode_loss = []  # List to store losses for the current episode                                     ###
-        self.episode_losses = []  # List to store average loss per episode                                         ###
+        self.steps_per_episode = [] 
+        self.rewards_per_episode = [] 
+        self.loss_history = []  # To store loss values                                                            
+        self.epsilon_history = []  
+        self.episode_loss = []  # List to store losses for the current episode                                
+        self.episode_losses = []  # List to store average loss per episode                                    
         # print("input dimensions,,,,,,,,,,,,,,,,,,",input_dims)
         self.memory = ReplayBuffer(mem_size, len(input_dims))
         self.q_eval = DoubleDeepQNetwork(self.lr, self.n_actions,
@@ -109,8 +107,7 @@ class Agent():
                                          input_dims=self.input_dims,
                                          name=name + 'DoubleDeepQNetwork_q_next',
                                          chkpt_dir=self.chkpt_dir)
-
-        self.training_actions = []  # store actions during training                  ###
+        self.training_actions = []  # store actions during training               
 
         # random number less than epsilon it takes a random action
         # if the random number is greater than epsilon ot takes a greedy action
@@ -139,14 +136,13 @@ class Agent():
     def store_transition(self, state, action, reward, state_, done):
 
         # # Convert state to one-hot encoding if needed
-        # state = self.one_hot_encode(state)                                                                                         ###
-        # state_ = self.one_hot_encode(state_)                                                                                       ###
+        # state = self.one_hot_encode(state)                                                                                      
+        # state_ = self.one_hot_encode(state_)                                                                                     
 
         self.memory.store_transition(state, action, reward, state_, done)
-        self.training_actions.append(
-            action)  # Track action in training                                                           ###
+        self.training_actions.append(action)  # Track action in training                                                           
 
-    # def one_hot_encode(self, action):                                                                                              ###
+    # def one_hot_encode(self, action):                                                                                          
     #     one_hot_vector = np.zeros(25)  # Assuming 12 categories
     #     one_hot_vector[action] = 1
     #     return one_hot_vector
@@ -207,27 +203,24 @@ class Agent():
 
             loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
 
-            # print(f"Training step {self.learn_step_counter}: Loss = {loss.item()}") # To print loss for each step           ###
+            # print(f"Training step {self.learn_step_counter}: Loss = {loss.item()}") # To print loss for each step   
 
-            self.episode_loss.append(
-                loss.item())  # Append the loss value for the current episode                          ###
+            self.episode_loss.append(loss.item())  # Append the loss value for the current episode                  
 
-            self.loss_history.append(
-                loss.item())  # Append the loss value                                                  ###
-            self.epsilon_history.append(
-                self.epsilon)  # Track epsilon                                                      ###
+            self.loss_history.append(loss.item())  # Append the loss value                                          
+            self.epsilon_history.append(self.epsilon)  # Track epsilon                                                   
 
             loss.backward()
 
-            max_grad_norm = 3.0  # gradient clipping                                                                        ###
-            utils.clip_grad_norm_(self.q_eval.parameters(), max_grad_norm)  ###
+            max_grad_norm = 3.0  # gradient clipping                                                                  
+            utils.clip_grad_norm_(self.q_eval.parameters(), max_grad_norm) 
 
             self.q_eval.optimizer.step()
             self.learn_step_counter += 1
             self.decrement_epsilon()
-            # print(f"Loss: {loss.item()}")                                                                                                ###
+            # print(f"Loss: {loss.item()}")                                                                                         
 
-    def end_of_episode(self):  ###
+    def end_of_episode(self): 
         # Print average loss for the episode
         if self.episode_loss:
             avg_loss = np.mean(self.episode_loss)
@@ -243,19 +236,16 @@ class DoubleDeepQNetwork(nn.Module):
         self.checkpoint_file = os.path.join(self.chkpt_dir, name)
         # input_dims =
         # print("..............",len(input_dims))
-        self.fcl = nn.Linear(len(input_dims), 512)  ### changed 512 to 1024 hidden layers
-        self.bn1 = nn.BatchNorm1d(
-            512)  # Batch normalization layer                                                         ###
-        self.fc2 = nn.Linear(512,
-                             512)  # New hidden layer                                                                  ###
-        self.bn2 = nn.BatchNorm1d(512)  ###
-        self.dropout = nn.Dropout(
-            p=0.2)  # Dropout layer with 30% dropout rate                                              ###
+        self.fcl = nn.Linear(len(input_dims), 512) 
+        self.bn1 = nn.BatchNorm1d(512)  # Batch normalization layer                                                       
+        self.fc2 = nn.Linear(512,512)  # New hidden layer                                                           
+        self.bn2 = nn.BatchNorm1d(512) 
+        self.dropout = nn.Dropout(p=0.2)  # Dropout layer with 30% dropout rate                                        
         self.V = nn.Linear(512, 1)  # the value
         self.A = nn.Linear(512, n_actions)  # the advantage of actions, relative value of each action
 
-        self.optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=1e-5)  ### weight decay
-        self.loss = nn.SmoothL1Loss()  # Huber loss : Replaced MSELoss with HuberLoss                                        ###
+        self.optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=1e-5)  # weight decay
+        self.loss = nn.SmoothL1Loss()  # Huber loss : Replaced MSELoss with HuberLoss                                 
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
 
@@ -263,23 +253,21 @@ class DoubleDeepQNetwork(nn.Module):
         # print(state[0].size())
         # print("state...................",state)
         # flat1 = F.relu(self.fcl(state))
-        flat1 = F.leaky_relu(self.fcl(state), negative_slope=0.01)  ### Replaced ReLU with Leaky ReLU
-        flat1 = self.dropout(
-            flat1)  # Applying dropout                                                                 ###
-        if flat1.size(0) > 1:  ###
-            flat1 = self.bn1(flat1)  ###
+        flat1 = F.leaky_relu(self.fcl(state), negative_slope=0.01)  # Replaced ReLU with Leaky ReLU
+        flat1 = self.dropout(flat1)  # Applying dropout                                                            
+        if flat1.size(0) > 1:  
+            flat1 = self.bn1(flat1)  
 
         # V = self.V(flat1)
         # A = self.A(flat1)
 
-        # Second hidden layer
-        flat2 = F.leaky_relu(self.fc2(flat1), negative_slope=0.01)  ###
-        flat2 = self.dropout(flat2)  ###
-        if flat2.size(0) > 1:  ###
-            flat2 = self.bn2(flat2)  ###
+        flat2 = F.leaky_relu(self.fc2(flat1), negative_slope=0.01)  # Second hidden layer
+        flat2 = self.dropout(flat2)  
+        if flat2.size(0) > 1:  
+            flat2 = self.bn2(flat2)  
 
-        V = self.V(flat2)  ###
-        A = self.A(flat2)  ###
+        V = self.V(flat2)  
+        A = self.A(flat2) 
 
         return V, A
 
@@ -290,11 +278,11 @@ class DoubleDeepQNetwork(nn.Module):
 
     def load_checkpoint(self):
         # print('... loading checkpoint ....')
-        print(f'... loading checkpoint from {self.checkpoint_file} ...')  ###
+        print(f'... loading checkpoint from {self.checkpoint_file} ...')  
         self.load_state_dict(T.load(self.checkpoint_file, map_location=T.device('cpu')))
 
 
-def training_event_mapping(n_actions):  ###
+def training_event_mapping(n_actions):  
     """Create a mapping from action indices to event names."""
     events = ["No Action"]  # Start with "No Action" for index 0
     for i in range(1, n_actions):
@@ -302,24 +290,22 @@ def training_event_mapping(n_actions):  ###
     return {i: event for i, event in enumerate(events)}
 
 
-def print_training_event_usage(agent):  ###
+def print_training_event_usage(agent):  
     num_actions = agent.n_actions
     event_mapping = training_event_mapping(num_actions)
-
     event_count = {}
     for action in agent.training_actions:
-        event_name = event_mapping.get(action, f"Unknown Event {action}")  # Use the mapping
+        event_name = event_mapping.get(action, f"Unknown Event {action}")  
         if event_name in event_count:
             event_count[event_name] += 1
         else:
             event_count[event_name] = 1
-
     print(f"{agent.name} Training Event Usage:")
     for event, count in sorted(event_count.items()):
         print(f"{event}: {count} times")
 
 
-def print_event_usage(actions):  ###
+def print_event_usage(actions):  
     event_count = {}
     for game_actions in actions["red_agent"]:
         for event in game_actions:
@@ -327,20 +313,17 @@ def print_event_usage(actions):  ###
                 event_count[event] += 1
             else:
                 event_count[event] = 1
-
     print("Red Agent Event Usage:")
     for event in sorted(event_count.keys()):
         count = event_count[event]
         print(f"Event {event}: {count} times")
 
 
-def plot_event_usage(event_count, title, plot_filename):  ###
+def plot_event_usage(event_count, title, plot_filename):  
     events = sorted(list(event_count.keys()))
     counts = [event_count[event] for event in events]
-
     max_count = max(counts)
     colors = ['green' if count == max_count else 'blue' for count in counts]
-
     plt.figure(figsize=(10, 6))
     plt.bar(events, counts, color=colors)
     plt.xlabel('Events')
@@ -348,8 +331,6 @@ def plot_event_usage(event_count, title, plot_filename):  ###
     plt.title(title)
     plt.xticks(rotation=45)
     plt.tight_layout()
-
-    # Save the plot
     save_dir = 'C:\\Users\\HP\\PycharmProjects\\DFT_MARL\\ddqn_analysisGraphs_2-34K_huberloss'
     os.makedirs(save_dir, exist_ok=True)
     file_path = os.path.join(save_dir, plot_filename)
@@ -360,7 +341,6 @@ def plot_event_usage(event_count, title, plot_filename):  ###
 def plot_loss(agent, save_dir, agent_name):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-
     plt.plot(agent.loss_history)
     plt.title(f"Training Loss for {agent_name} Over Time")
     plt.xlabel("Training Steps")
@@ -370,38 +350,7 @@ def plot_loss(agent, save_dir, agent_name):
     plt.clf()
 
 
-# def plot_training_metrics(agent, save_dir):
-#     if not os.path.exists(save_dir):
-#         os.makedirs(save_dir)
-
-#     # Plot rewards per episode
-#     plt.figure(figsize=(10, 6))
-#     plt.plot(agent.rewards_per_episode)
-#     plt.xlabel('Episodes')
-#     plt.ylabel('Rewards')
-#     plt.title(f'{agent.name} - Rewards per Episode')
-#     plt.savefig(os.path.join(save_dir, f'{agent.name}_rewards.png'))
-#     plt.close()
-
-#     # Plot loss curve
-#     plt.figure(figsize=(10, 6))
-#     plt.plot(agent.losses)
-#     plt.xlabel('Training Steps')
-#     plt.ylabel('Loss')
-#     plt.title(f'{agent.name} - Loss over Training')
-#     plt.savefig(os.path.join(save_dir, f'{agent.name}_loss.png'))
-#     plt.close()
-
-#     # Plot epsilon decay
-#     plt.figure(figsize=(10, 6))
-#     plt.plot(agent.epsilon_history)
-#     plt.xlabel('Training Steps')
-#     plt.ylabel('Epsilon')
-#     plt.title(f'{agent.name} - Epsilon Decay')
-#     plt.savefig(os.path.join(save_dir, f'{agent.name}_epsilon.png'))
-#     plt.close()
-
-def plot_loss_avg(agent, save_dir, agent_name):  ####
+def plot_loss_avg(agent, save_dir, agent_name):  
     plt.figure(figsize=(10, 6))
     episodes = np.arange(len(agent.episode_losses))  # Episode numbers
     plt.plot(episodes, agent.episode_losses, label=f'{agent_name} Average Loss')
@@ -411,95 +360,44 @@ def plot_loss_avg(agent, save_dir, agent_name):  ####
     plt.legend()
     plt.grid(True)
     plt.savefig(os.path.join(save_dir, f'{agent_name}_average_loss_curve_0.png'))
-    plt.show()
+    # plt.show()
 
-
-# Function to compute a simple moving average (SMA)                                                                                     ####
-def moving_average(data, window_size):
+                                                                                
+def moving_average(data, window_size):  # Function to compute a simple moving average (SMA) 
     return np.convolve(data, np.ones(window_size) / window_size, mode='valid')
-
-
-# # Function to plot loss with smoothing
-# def plot_loss_with_smoothing(agent, save_dir, agent_name, window_size=100):
-#     # Assuming agent.loss_history stores the loss values
-#     losses = agent.loss_history
-
-#     # Apply moving average to smooth the loss curve
-#     smoothed_losses = moving_average(losses, window_size)
-
-#     # Plot both raw and smoothed loss curves
-#     plt.figure(figsize=(10,6))
-#     plt.plot(range(len(losses)), losses, label='Raw Loss', alpha=0.4)
-#     plt.plot(range(len(smoothed_losses)), smoothed_losses, label=f'Smoothed Loss (Window={window_size})', color='r')
-#     plt.title(f'{agent_name} Loss History')
-#     plt.xlabel('Episodes')
-#     plt.ylabel('Loss')
-#     plt.legend()
-#     plt.grid(True)
-
-#     # Save the plot if needed
-#     plt.savefig(f'{save_dir}/{agent_name}_loss_smoothing.png')
-#     plt.show()
-
+    
 
 def exponential_moving_average(data, alpha=0.1):
     ema = [data[0]]  # Initialize EMA with the first value of data
-    for i in range(1, len(data)):
-        ema.append(alpha * data[i] + (1 - alpha) * ema[i - 1])
+    for i in range(1, len(data)):ema.append(alpha * data[i] + (1 - alpha) * ema[i - 1])
     return np.array(ema)
 
 
-# # Function to plot loss with EMA smoothing
-# def plot_loss_with_ema(agent, save_dir, agent_name, alpha=0.1):                                                                         ####
-#     # Assuming agent.loss_history stores the loss values
-#     losses = agent.loss_history
-
-#     # Apply exponential moving average to smooth the loss curve
-#     smoothed_losses = exponential_moving_average(losses, alpha)
-
-#     # Plot both raw and smoothed loss curves
-#     plt.figure(figsize=(10,6))
-#     plt.plot(range(len(losses)), losses, label='Raw Loss', alpha=0.4)
-#     plt.plot(range(len(smoothed_losses)), smoothed_losses, label=f'Smoothed Loss (EMA alpha={alpha})', color='r')
-#     plt.title(f'{agent_name} Loss History (EMA)')
-#     plt.xlabel('Episodes')
-#     plt.ylabel('Loss')
-#     plt.legend()
-#     plt.grid(True)
-
-#     # Save the plot if needed
-#     plt.savefig(f'{save_dir}/{agent_name}_loss_ema.png')
-#     plt.show()
-
 def plot_loss_avg(agent, save_dir, agent_name, window_size=10, ema_alpha=0.01):
     plt.figure(figsize=(10, 6))
-
     episodes = np.arange(len(agent.episode_losses))  # Episode numbers
     avg_losses = np.array(agent.episode_losses)
 
     # Plot original average loss
     plt.plot(episodes, avg_losses, label=f'{agent_name} Average Loss', alpha=0.3)
 
-    # Calculate and plot moving average
+    # Plot moving average
     if len(avg_losses) >= window_size:
         smoothed_ma = moving_average(avg_losses, window_size)
         ma_episodes = np.arange(len(smoothed_ma))  # Adjust episode range for moving average
         plt.plot(ma_episodes, smoothed_ma, label=f'{agent_name} Moving Average (window={window_size})')
 
-    # Calculate and plot exponential moving average
+    # Plot exponential moving average
     smoothed_ema = exponential_moving_average(avg_losses, alpha=ema_alpha)
     plt.plot(episodes, smoothed_ema, label=f'{agent_name} Exponential Moving Average (alpha={ema_alpha})')
 
-    # Plot settings
     plt.xlabel('Episode')
     plt.ylabel('Average Loss')
     plt.title(f'Average Loss per Episode for {agent_name}')
     plt.legend()
     plt.grid(True)
-
-    # Save and show plot
     plt.savefig(os.path.join(save_dir, f'{agent_name}_average_loss_curve.png'))
-    plt.show()
+    # plt.show()
 
 
 def play():
@@ -512,7 +410,7 @@ def play():
 
     num_games = 50
 
-    new_batch_size = 32  # New batch size                                                                      ###
+    new_batch_size = 32  # New batch size                                                                     
 
     red_agent = Agent(name="red_agent_34K", gamma=0.99, epsilon=0.5, lr=5e-6,
                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
@@ -525,11 +423,11 @@ def play():
         v.load_models()
 
     # Fine-tuning epsilon for exploitation after training
-    red_agent.epsilon = 0.00  ###
-    blue_agent.epsilon = 0.00  ###
+    red_agent.epsilon = 0.00  
+    blue_agent.epsilon = 0.00  
 
-    # print(f"Epsilon for red_agent during actual game: {red_agent.epsilon}")             ###
-    # print(f"Epsilon for blue_agent during actual game: {blue_agent.epsilon}")           ###
+    # print(f"Epsilon for red_agent during actual game: {red_agent.epsilon}")             
+    # print(f"Epsilon for blue_agent during actual game: {blue_agent.epsilon}")          
 
     scores = {"red_agent": [], "blue_agent": []}
     actions = {"red_agent": [], "blue_agent": []}
@@ -572,7 +470,7 @@ def play():
     print(wins)
     # print(actions)
 
-    # Calculate and plot event usage for Red Agent                                                                  #####
+    # Calculate and plot event usage for Red Agent                                                        
     red_agent_event_count = {}
     for game_actions in actions["red_agent"]:
         for event in game_actions:
@@ -580,7 +478,6 @@ def play():
                 red_agent_event_count[event] += 1
             else:
                 red_agent_event_count[event] = 1
-
     print("Red Agent Event Usage:")
     for event in sorted(red_agent_event_count.keys()):
         count = red_agent_event_count[event]
@@ -597,21 +494,20 @@ def play():
                 blue_agent_event_count[event] += 1
             else:
                 blue_agent_event_count[event] = 1
-
     print("Blue Agent Event Usage:")
     for event in sorted(blue_agent_event_count.keys()):
         count = blue_agent_event_count[event]
         print(f"Event {event}: {count} times")
 
     # Plot the event usage for Blue Agent
-    plot_event_usage(blue_agent_event_count, 'Blue Agent Event Usage', 'blue_agent_event_usage.png')  ######
+    plot_event_usage(blue_agent_event_count, 'Blue Agent Event Usage', 'blue_agent_event_usage.png') 
 
     # Print event usage by the red agent
-    # print_event_usage(actions)                                                                                       ###
+    # print_event_usage(actions)                                                                                     
 
 
 if __name__ == '__main__':
-    set_seed(42)  # Set a fixed seed value for reproducibility                                                              ###
+    set_seed(42)  # Set seed for reproducibility                                                        
     env = env_creator.create_env()
     num_agents = len(env.possible_agents)
     num_actions = env.action_space.n
@@ -622,7 +518,7 @@ if __name__ == '__main__':
     num_games = 5000
     load_checkpoint = False
 
-    new_batch_size = 32  # New batch size                                                                          ###
+    new_batch_size = 32  # New batch size                                                                         
 
     red_agent = Agent(name="red_agent_34K", gamma=0.99, epsilon=0.5, lr=5e-6,
                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
@@ -638,7 +534,7 @@ if __name__ == '__main__':
     filename = 'DFT-DDQN.png'
     scores, eps_history = {}, {}
     wins = {"red_agent": 0, "blue_agent": 0}
-    actions_taken = {"red_agent": [], "blue_agent": []}  # Store actions taken by each agent                             ###
+    actions_taken = {"red_agent": [], "blue_agent": []}  # Store actions taken by each agent                       
     for k in agents.keys():
         scores[k] = []
         eps_history[k] = []
@@ -650,7 +546,7 @@ if __name__ == '__main__':
         score = {}
         for k, v in agents.items():
             score[k] = 0
-            actions_taken[k].append([])  # Start a new list for this episode            ###
+            actions_taken[k].append([])  # Start a new list for this episode     
         agent_nn = "red_agent"
         while not done:
             observation, reward, termination, truncation, info = env.last()
@@ -664,7 +560,7 @@ if __name__ == '__main__':
             new_observation, reward, termination, truncation, info = env.step(action)
 
             # Storing the action taken
-            actions_taken[agent_nn][-1].append(action)  # Append action to the last episode's list          ###
+            actions_taken[agent_nn][-1].append(action)  # Append action to the last episode's list     
 
             if termination or truncation:
                 done = True
@@ -679,32 +575,29 @@ if __name__ == '__main__':
         else:
             wins["red_agent"] += 1
 
-        # End of episode processing                                                                                                         ###
-        for k, agent in agents.items():                                                                                                     ###
-            agent.end_of_episode()                                                                                                          ###
+        # End of episode processing                                                                                                   
+        for k, agent in agents.items():                                                                                              
+            agent.end_of_episode()                                                                                                 
 
         if i % 1000 == 0:
             for k, v in agents.items():
                 v.save_models()
 
-    save_dir = 'C:\\Users\\HP\\PycharmProjects\\DFT_MARL\\ddqn_analysisGraphs_2-34K_huberloss'                                                        ###
-    plot_loss(red_agent, save_dir, "red_agent")                                                                                       ###
-    plot_loss(blue_agent, save_dir, "blue_agent")                                                                                     ###
-    plot_loss_avg(red_agent, save_dir, "red_agent")                                                                                   ###
-    plot_loss_avg(blue_agent, save_dir, "blue_agent")                                                                                 ###
-    # plot_loss_with_smoothing(red_agent, save_dir, "red_agent", window_size=100)                                                       ###
-    # plot_loss_with_ema(red_agent, save_dir, "red_agent", alpha=0.1)                                                                   ###
-    plot_loss_avg(agent, save_dir, agent_name="AgentName", window_size=10, ema_alpha=0.01)                                             ###
+    save_dir = 'C:\\Users\\HP\\PycharmProjects\\DFT_MARL\\ddqn_analysisGraphs_2-34K_huberloss'                                              
+    plot_loss(red_agent, save_dir, "red_agent")                                                                                 
+    plot_loss(blue_agent, save_dir, "blue_agent")                                                                            
+    plot_loss_avg(red_agent, save_dir, "red_agent")                                                                          
+    plot_loss_avg(blue_agent, save_dir, "blue_agent")                                                                       
+    # plot_loss_with_smoothing(red_agent, save_dir, "red_agent", window_size=100)                                              
+    # plot_loss_with_ema(red_agent, save_dir, "red_agent", alpha=0.1)                                                         
+    plot_loss_avg(agent, save_dir, agent_name="AgentName", window_size=10, ema_alpha=0.01)                                    
     print(wins)
 
     for k, v in agents.items():
         v.save_models()
-        print_training_event_usage(v)  # Print event usage after training                                                               ###
+        print_training_event_usage(v)  # Print event usage after training                                                                                                                                
 
-        #save_dir = 'C:\\Users\\HP\\PycharmProjects\\DFT_MARL\\ddqn_analysisGraphs'
-        #plot_training_metrics(v, save_dir) # Plot metrics after training                                                                          ###
-
-        # Create and plot event usage for training                                                                                      ###
+        # Create and plot event usage for training                                                                             
         training_event_count = {}
         for action in v.training_actions:
             event_name = training_event_mapping(v.n_actions).get(action, f"Unknown Event {action}")
@@ -712,13 +605,9 @@ if __name__ == '__main__':
                 training_event_count[event_name] += 1
             else:
                 training_event_count[event_name] = 1
-
         plot_event_usage(training_event_count, f'{v.name} Training Event Usage', f'{v.name}_training_event_usage.png')
 
-
-    # Print the actions taken by each agent
-    # print(actions_taken)                                                                                                                ###
-
+    # print(actions_taken)  # Print the actions taken by each agent                                                                                                       
     # play()
 
 play()
