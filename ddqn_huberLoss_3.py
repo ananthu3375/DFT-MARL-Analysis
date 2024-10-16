@@ -515,10 +515,10 @@ if __name__ == '__main__':
     observation = env.game.observations
     max_cycles = env.game.get_max_steps() + 4
 
-    num_games = 5000
+    num_games = 100000
     load_checkpoint = False
 
-    new_batch_size = 32  # New batch size                                                                         
+    new_batch_size = 32                                                                          
 
     red_agent = Agent(name="red_agent_4_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
