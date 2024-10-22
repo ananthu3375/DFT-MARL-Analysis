@@ -334,7 +334,7 @@ def plot_event_usage(event_count, title, plot_filename):
     plt.title(title)
     plt.xticks(rotation=45)
     plt.tight_layout()
-    save_dir = '5_100K_DFT_MARL-ddqn_analysisGraphs_huberloss'
+    save_dir = '5_100K_DFT_MARL-ddqn_analysisGraphs'
     os.makedirs(save_dir, exist_ok=True)
     file_path = os.path.join(save_dir, plot_filename)
     plt.savefig(file_path, format='png')
@@ -509,109 +509,109 @@ def play():
     # print_event_usage(actions)
 
 
-if __name__ == '__main__':
-    set_seed(42)  # Set seed for reproducibility
-    env = env_creator.create_env()
-    num_agents = len(env.possible_agents)
-    num_actions = env.action_space.n
-    observation_size = env.observation_space.shape
-    observation = env.game.observations
-    max_cycles = env.game.get_max_steps() + 4
-
-    num_games = 100000
-    load_checkpoint = False
-
-    new_batch_size = 32
-
-    red_agent = Agent(name="red_agent_5_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
-                      input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
-                      batch_size=new_batch_size, eps_dec=1e-4, replace=100)
-    blue_agent = Agent(name="blue_agent_5_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
-                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
-                       batch_size=new_batch_size, eps_dec=1e-4, replace=100)
-    agents = {"red_agent": red_agent, "blue_agent": blue_agent}
-    if load_checkpoint:
-        for k, v in agents.items():
-            v.load_models()
-
-    filename = 'DFT-DDQN.png'
-    scores, eps_history = {}, {}
-    wins = {"red_agent": 0, "blue_agent": 0}
-    actions_taken = {"red_agent": [], "blue_agent": []}  # Store actions taken by each agent
-    for k in agents.keys():
-        scores[k] = []
-        eps_history[k] = []
-
-    for i in range(num_games):
-        print("episode ", i)
-        done = False
-        observation = env.reset()
-        score = {}
-        for k, v in agents.items():
-            score[k] = 0
-            actions_taken[k].append([])  # Start a new list for this episode
-        agent_nn = "red_agent"
-        while not done:
-            observation, reward, termination, truncation, info = env.last()
-            # print(observation)
-            if termination or truncation:
-                action = None
-                break
-            env_agent = env.agent_selection
-            action_mask = env.game.get_mask(env_agent)
-            action = agents[agent_nn].choose_action(observation, action_mask)
-            new_observation, reward, termination, truncation, info = env.step(action)
-
-            # Storing the action taken
-            actions_taken[agent_nn][-1].append(action)  # Append action to the last episode's list
-
-            if termination or truncation:
-                done = True
-            score[agent_nn] += reward
-            agents[agent_nn].store_transition(observation, action, reward, new_observation, done)
-            agents[agent_nn].learn(i)
-            agent_nn = "blue_agent" if agent_nn == "red_agent" else "red_agent"
-        for k in scores.keys():
-            scores[k].append(score[k])
-        if env.system.state == 1:
-            wins["blue_agent"] += 1
-        else:
-            wins["red_agent"] += 1
-
-        # End of episode processing
-        for k, agent in agents.items():
-            agent.end_of_episode()
-
-        if i % 1000 == 0:
-            for k, v in agents.items():
-                v.save_models()
-
-    save_dir = '5_100K_DFT_MARL-ddqn_analysisGraphs_huberloss'
-    plot_loss(red_agent, save_dir, "red_agent")
-    plot_loss(blue_agent, save_dir, "blue_agent")
-    plot_loss_avg(red_agent, save_dir, "red_agent")
-    plot_loss_avg(blue_agent, save_dir, "blue_agent")
-    # plot_loss_with_smoothing(red_agent, save_dir, "red_agent", window_size=100)
-    # plot_loss_with_ema(red_agent, save_dir, "red_agent", alpha=0.1)
-    plot_loss_avg(agent, save_dir, agent_name="AgentName", window_size=10, ema_alpha=0.01)
-    print(wins)
-
-    for k, v in agents.items():
-        v.save_models()
-        print_training_event_usage(
-            v)  # Print event usage after training
-
-        # Create and plot event usage for training
-        training_event_count = {}
-        for action in v.training_actions:
-            event_name = training_event_mapping(v.n_actions).get(action, f"Unknown Event {action}")
-            if event_name in training_event_count:
-                training_event_count[event_name] += 1
-            else:
-                training_event_count[event_name] = 1
-        plot_event_usage(training_event_count, f'{v.name} Training Event Usage', f'{v.name}_training_event_usage.png')
-
-    # print(actions_taken)  # Print the actions taken by each agent
-    # play()
+# if __name__ == '__main__':
+#     set_seed(42)  # Set seed for reproducibility
+#     env = env_creator.create_env()
+#     num_agents = len(env.possible_agents)
+#     num_actions = env.action_space.n
+#     observation_size = env.observation_space.shape
+#     observation = env.game.observations
+#     max_cycles = env.game.get_max_steps() + 4
+#
+#     num_games = 100000
+#     load_checkpoint = False
+#
+#     new_batch_size = 32
+#
+#     red_agent = Agent(name="red_agent_5_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
+#                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
+#                       batch_size=new_batch_size, eps_dec=1e-4, replace=100)
+#     blue_agent = Agent(name="blue_agent_5_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
+#                        input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
+#                        batch_size=new_batch_size, eps_dec=1e-4, replace=100)
+#     agents = {"red_agent": red_agent, "blue_agent": blue_agent}
+#     if load_checkpoint:
+#         for k, v in agents.items():
+#             v.load_models()
+#
+#     filename = 'DFT-DDQN.png'
+#     scores, eps_history = {}, {}
+#     wins = {"red_agent": 0, "blue_agent": 0}
+#     actions_taken = {"red_agent": [], "blue_agent": []}  # Store actions taken by each agent
+#     for k in agents.keys():
+#         scores[k] = []
+#         eps_history[k] = []
+#
+#     for i in range(num_games):
+#         print("episode ", i)
+#         done = False
+#         observation = env.reset()
+#         score = {}
+#         for k, v in agents.items():
+#             score[k] = 0
+#             actions_taken[k].append([])  # Start a new list for this episode
+#         agent_nn = "red_agent"
+#         while not done:
+#             observation, reward, termination, truncation, info = env.last()
+#             # print(observation)
+#             if termination or truncation:
+#                 action = None
+#                 break
+#             env_agent = env.agent_selection
+#             action_mask = env.game.get_mask(env_agent)
+#             action = agents[agent_nn].choose_action(observation, action_mask)
+#             new_observation, reward, termination, truncation, info = env.step(action)
+#
+#             # Storing the action taken
+#             actions_taken[agent_nn][-1].append(action)  # Append action to the last episode's list
+#
+#             if termination or truncation:
+#                 done = True
+#             score[agent_nn] += reward
+#             agents[agent_nn].store_transition(observation, action, reward, new_observation, done)
+#             agents[agent_nn].learn(i)
+#             agent_nn = "blue_agent" if agent_nn == "red_agent" else "red_agent"
+#         for k in scores.keys():
+#             scores[k].append(score[k])
+#         if env.system.state == 1:
+#             wins["blue_agent"] += 1
+#         else:
+#             wins["red_agent"] += 1
+#
+#         # End of episode processing
+#         for k, agent in agents.items():
+#             agent.end_of_episode()
+#
+#         if i % 1000 == 0:
+#             for k, v in agents.items():
+#                 v.save_models()
+#
+#     save_dir = '5_100K_DFT_MARL-ddqn_analysisGraphs'
+#     plot_loss(red_agent, save_dir, "red_agent")
+#     plot_loss(blue_agent, save_dir, "blue_agent")
+#     plot_loss_avg(red_agent, save_dir, "red_agent")
+#     plot_loss_avg(blue_agent, save_dir, "blue_agent")
+#     # plot_loss_with_smoothing(red_agent, save_dir, "red_agent", window_size=100)
+#     # plot_loss_with_ema(red_agent, save_dir, "red_agent", alpha=0.1)
+#     plot_loss_avg(agent, save_dir, agent_name="AgentName", window_size=10, ema_alpha=0.01)
+#     print(wins)
+#
+#     for k, v in agents.items():
+#         v.save_models()
+#         print_training_event_usage(
+#             v)  # Print event usage after training
+#
+#         # Create and plot event usage for training
+#         training_event_count = {}
+#         for action in v.training_actions:
+#             event_name = training_event_mapping(v.n_actions).get(action, f"Unknown Event {action}")
+#             if event_name in training_event_count:
+#                 training_event_count[event_name] += 1
+#             else:
+#                 training_event_count[event_name] = 1
+#         plot_event_usage(training_event_count, f'{v.name} Training Event Usage', f'{v.name}_training_event_usage.png')
+#
+#     # print(actions_taken)  # Print the actions taken by each agent
+#     # play()
 
 play()

@@ -327,7 +327,7 @@ def plot_event_usage(event_count, title, plot_filename):
     plt.tight_layout()
 
     # Save the plot
-    save_dir = 'C:\\Users\\HP\\PycharmProjects\\DFT_MARL\\ddqn_analysisGraphs_30K_huberloss'
+    save_dir = 'C:\\Users\\HP\\PycharmProjects\\DFT_MARL\\ddqn_analysisGraphs_30K'
     os.makedirs(save_dir, exist_ok=True)
     file_path = os.path.join(save_dir, plot_filename)
     plt.savefig(file_path, format='png')
@@ -630,7 +630,7 @@ if __name__ == '__main__':
             for k, v in agents.items():
                 v.save_models()
 
-    save_dir = 'C:\\Users\\HP\\PycharmProjects\\DFT_MARL\\ddqn_analysisGraphs_30K_huberloss'
+    save_dir = 'C:\\Users\\HP\\PycharmProjects\\DFT_MARL\\ddqn_analysisGraphs_30K'
     plot_loss(red_agent, save_dir, "red_agent")
     plot_loss(blue_agent, save_dir, "blue_agent")
     plot_loss_avg(red_agent, save_dir, "red_agent")

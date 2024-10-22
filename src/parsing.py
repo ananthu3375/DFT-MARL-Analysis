@@ -2,11 +2,11 @@ import xml.etree.ElementTree as ET
 from src.system import System
 from src.element import BasicEvent,IntermediateTopEvent,Precedence
 
+
 class Parse:
-    '''
+    """
     Simple model parse interface
-    '''
- 
+    """
     def from_file(file_name):
         file_type = file_name.split('.')[-1]                    # Gets the file_type 
         if file_type == 'xml':                                  # If xml

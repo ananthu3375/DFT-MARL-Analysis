@@ -343,7 +343,7 @@ def plot_event_usage(red_event_count, blue_event_count, n_actions, title, plot_f
     plt.xticks(indices, all_events, rotation=45)
     plt.legend()
     plt.tight_layout()
-    save_dir = '0_100K_DFT_MARL-ddqn_analysisGraphs_huberloss'
+    save_dir = '0_100K_DFT_MARL-ddqn_analysisGraphs'
     os.makedirs(save_dir, exist_ok=True)
     file_path = os.path.join(save_dir, plot_filename)
     plt.savefig(file_path, format='png')
@@ -620,7 +620,7 @@ if __name__ == '__main__':
             for k, v in agents.items():
                 v.save_models()
                 
-    save_dir = '0_100K_DFT_MARL-ddqn_analysisGraphs_huberloss'
+    save_dir = '0_100K_DFT_MARL-ddqn_analysisGraphs'
     plot_loss(red_agent, save_dir, "red_agent")
     plot_loss(blue_agent, save_dir, "blue_agent")
     plot_loss_avg(red_agent, save_dir, "red_agent")
