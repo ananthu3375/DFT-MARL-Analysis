@@ -315,7 +315,7 @@ def actual_game():
     max_cycles = env.game.get_max_steps() + 4
 
     # Set the number of evaluation games
-    num_games = 500
+    num_games = 100
 
     # Load the saved models for both agents (red and blue)
     red_agent = Agent(name="red_agent_2_100K", gamma=0.99, epsilon=1.0, lr=5e-6,
@@ -440,9 +440,9 @@ def actual_game():
 
     print(f"\n\nScores: {scores}")
     print(f"\n\nWins: {wins}")
-    print(f"\n\nActions: {actions}")
-    print(f"\n\nSystem States for Red Agent: {red_system_states}")
-    print(f"\n\nSystem States for Blue Agent: {blue_system_states}")
+    # print(f"\n\nActions: {actions}")
+    # print(f"\n\nSystem States for Red Agent: {red_system_states}")
+    # print(f"\n\nSystem States for Blue Agent: {blue_system_states}")
 
     # To print action sequence counts
     for agent in action_sequence_counts.keys():
@@ -461,6 +461,8 @@ def actual_game():
     
     calculate_and_plot_event_usage(actions)
     print(f"\n\nWins: {wins}")
+    print("Finished executing the games. Returning actions and wins.")
+    return {"actions": actions, "wins": wins}
 
 
 if __name__ == '__main__':

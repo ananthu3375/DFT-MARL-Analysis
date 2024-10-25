@@ -72,27 +72,46 @@ class ReliabilityAnalysis:
                 self.gates[target]['competitor'] = competitor
                 self.gates[target]['children'].append(source)
 
-    def calculate_adjusted_reliability(self, mttr, repair_cost, failure_cost, alpha=0.5):
+    def calculate_reliability(self, mttr, repair_cost, failure_cost, alpha=0.5):
         """
-        To calculate the adjusted reliability of a basic event based on MTTR, repair cost, and failure cost.
+        To calculate the reliability of a basic event based on MTTR, repair cost, and failure cost.
         :param mttr: Mean Time to Repair (MTTR) value for the event
         :param repair_cost: Cost of repairing the event after failure
         :param failure_cost: Cost of failure of the event
         :param alpha: Weighting factor for failure cost influence
-        :return: Adjusted Reliability value at time t
+        :return: Reliability value at time t
         """
-        lambda_adjusted = (1 / mttr) * (1 + alpha * (failure_cost / repair_cost))
-        return np.exp(-lambda_adjusted * self.time)
+        lambda_ = (1 / mttr) * (1 + alpha * (failure_cost / repair_cost))
+        return np.exp(-lambda_ * self.time)
 
     def calculate_event_reliabilities(self):
         """
-        To calculate the adjusted reliability for each basic event in the system.
+        To calculate the reliability for each basic event in the system.
         :return: Dictionary of event reliabilities
         """
         self.event_reliabilities = {
-            event: self.calculate_adjusted_reliability(data['mttr'], data['repair_cost'], data['failure_cost'])
+            event: self.calculate_reliability(data['mttr'], data['repair_cost'], data['failure_cost'])
             for event, data in self.events.items()
         }
+
+    def calculate_ps_gate_reliability(self):
+        """
+        Calculates the reliability of the PS gate based on the reliabilities of A and B.
+        Considers their MTTR, repair cost, and failure cost while calculating their lambda.
+        Uses the priority AND (PS) gate formula.
+        """
+        event_A = self.events['A']
+        event_B = self.events['B']
+        reliability_A = self.calculate_reliability(event_A['mttr'], event_A['repair_cost'], event_A['failure_cost'])
+        reliability_B = self.calculate_reliability(event_B['mttr'], event_B['repair_cost'], event_B['failure_cost'])
+        # lambda_A = (1 / event_A['mttr']) * (1 + 0.5 * (event_A['failure_cost'] / event_A['repair_cost']))
+        # lambda_B = (1 / event_B['mttr']) * (1 + 0.5 * (event_B['failure_cost'] / event_B['repair_cost']))
+
+        # PS gate reliability formula
+        # reliability_PS = reliability_A + reliability_B - (reliability_A * (lambda_A / (lambda_A + lambda_B)) * reliability_B)
+        reliability_PS = reliability_A * reliability_B
+        self.gate_reliabilities['PS'] = reliability_PS
+        return reliability_PS
 
     def calculate_csp_reliability(self, M1_reliability, M2_reliability, M3_reliability):
         # Failure probabilities for M1, M2, M3
@@ -156,6 +175,8 @@ class ReliabilityAnalysis:
             elif gate_type == 'FDEP':
                 fdep_sources = gate.get('fdep_sources', [])
                 source_reliabilities = [self.get_event_or_gate_reliability(src, visited) for src in fdep_sources]
+                children_reliabilities = [self.get_event_or_gate_reliability(child, visited) for child in
+                                          gate['children']]
                 reliability = np.prod(source_reliabilities) * np.prod(children_reliabilities)
             else:
                 raise ValueError(f"Unsupported gate type: {gate_type}")
@@ -188,6 +209,7 @@ class ReliabilityAnalysis:
         To perform the full analysis to calculate event reliabilities and system reliability.
         """
         self.calculate_event_reliabilities()
+        self.calculate_ps_gate_reliability()
         self.calculate_system_reliability()
         self.print_results()
 
@@ -207,7 +229,7 @@ class ReliabilityAnalysis:
 
 
 class ImportanceAnalysis:
-    def __init__(self, reliability_analysis, delta=1e-5):
+    def __init__(self, reliability_analysis, delta=1e-2):
         """
         Initialize the ImportanceAnalysis class with the results from ReliabilityAnalysis.
         :param reliability_analysis: Instance of ReliabilityAnalysis with completed reliability calculations
