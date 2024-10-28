@@ -109,92 +109,45 @@ class ReliabilityAnalysis:
             self.event_reliabilities[event] = reliability
             print(f"Event {event}: {reliability:.4f}")
 
-    def calculate_csp_reliability(self, M1_reliability, M2_reliability, M3_reliability):
-        P_fail_M1 = 1 - M1_reliability
-        P_fail_M2 = 1 - M2_reliability
-        P_fail_M3 = 1 - M3_reliability
+    def calculate_ps_reliability(self):
+        """
+        Calculate the reliability of the PS event based on the reliabilities of basic events A and B.
+        """
+        R_A = self.event_reliabilities.get("A")
+        R_B = self.event_reliabilities.get("B")
+        if R_A is None or R_B is None:
+            print("Reliabilities for events A and B are not defined.")
+            return
+        R_PS = R_A + R_B - R_A * R_B
+        self.gate_reliabilities["PS"] = R_PS
+        print(f"\nIntermediate Event:\nPS = {R_PS:.4f}")
 
-        P_fail_two = (P_fail_M1 * P_fail_M2 * M3_reliability) + \
-                     (P_fail_M1 * P_fail_M3 * M2_reliability) + \
-                     (P_fail_M2 * P_fail_M3 * M1_reliability)
-        P_fail_all_three = P_fail_M1 * P_fail_M2 * P_fail_M3
-        P_fail_CSP = P_fail_two + P_fail_all_three
+    def calculate_intermediate_event_reliabilities(self):
+        """
+        Calculate the reliabilities of the intermediate events C1, C2, M1, M2, M3 based on their child events.
+        """
+        intermediate_events = ["C1", "C2", "M1", "M2", "M3"]
 
-        R_CSP1 = 1 - P_fail_CSP
-        R_CSP2 = 1 - P_fail_CSP
-
-        return R_CSP1, R_CSP2
-
-    def evaluate_gate(self, gate_name, visited=None):
-        if visited is None:
-            visited = set()
-
-        if gate_name in visited:
-            print(f"Warning: Circular reference detected at gate: {gate_name}")
-            return 1
-
-        visited.add(gate_name)
-        gate = self.gates[gate_name]
-        gate_type = gate['gate_type']
-
-        print(f"Evaluating gate {gate_name} (type: {gate_type}) with children: {gate['children']}")  ###
-
-        if gate_type == 'CSP':
-            M1_reliability = self.get_event_or_gate_reliability('M1', visited)
-            M2_reliability = self.get_event_or_gate_reliability('M2', visited)
-            M3_reliability = self.get_event_or_gate_reliability('M3', visited)
-            print(f"CSP gate {gate_name}: M1={M1_reliability}, M2={M2_reliability}, M3={M3_reliability}")  ###
-
-            R_CSP1, R_CSP2 = self.calculate_csp_reliability(M1_reliability, M2_reliability, M3_reliability)
-            reliability = R_CSP1 if gate_name == 'CSP1' else R_CSP2
-
-        else:
-            children_reliabilities = [self.get_event_or_gate_reliability(child, visited) for child in gate['children']]
-            print(f"{gate_type} gate {gate_name} children reliabilities: {children_reliabilities}")  ###
-            if gate_type == 'OR':  # OR gate reliability: R1 * R2 * ... * Rn
-                reliability = np.prod(children_reliabilities)
-            elif gate_type == 'AND':  # AND gate reliability: 1 - (1 - R1) * (1 - R2) * ... * (1 - Rn) : since the
-                # gates are implemented from a fault propagation perspective
-                reliability = 1 - np.prod([1 - r for r in children_reliabilities])
-            elif gate_type == 'FDEP':
-                fdep_sources = gate.get('fdep_sources', [])
-                source_reliabilities = [self.get_event_or_gate_reliability(src, visited) for src in fdep_sources]
-                reliability = np.prod(source_reliabilities) * np.prod(children_reliabilities)
-                print(f"FDEP gate {gate_name}: source reliabilities: {source_reliabilities}")  ###
-            else:
-                raise ValueError(f"Unsupported gate type: {gate_type}")
-
-        self.gate_reliabilities[gate_name] = reliability
-        visited.remove(gate_name)
-        return reliability
-
-    def get_event_or_gate_reliability(self, name, visited):
-        if name in self.event_reliabilities:
-            return self.event_reliabilities[name]
-        else:
-            return self.evaluate_gate(name, visited)
-
-    def calculate_intermediate_reliabilities(self):
-        for event in self.gates:
-            self.evaluate_gate(event)
-
-    def calculate_system_reliability(self, visited=None):
-        top_gate = [name for name, gate in self.gates.items() if gate['type'] == 'TOP'][0]
-        self.R_system = self.evaluate_gate(top_gate, visited)
-        return self.R_system
+        # print("\nCalculating Intermediate Event Reliabilities:")
+        for event in intermediate_events:
+            if event in self.gates:
+                children = self.gates[event]['children']
+                child_reliabilities = [self.event_reliabilities.get(child, 0) for child in children]
+                if child_reliabilities:
+                    # Reliability of an OR gate is: R = 1 - (1 - R1)(1 - R2)...(1 - Rn). Since the OR gate logic is
+                    # seen from the failure perspective, we have to take the AND gate logic for calculating reliability
+                    # AND gate logic: Reliability R = R1 * R2 * ...... * Rn
+                    reliability = np.prod(child_reliabilities)
+                    self.gate_reliabilities[event] = reliability
+                    print(f"{event} = {reliability:.4f}")
+                else:
+                    print(f"Intermediate Event {event} has no child events.")
 
     def run(self):
         self.calculate_total_event_usage()
         self.calculate_reliability()
-        self.calculate_intermediate_reliabilities()
-
-        print("\n\nReliability of Intermediate Events:")
-        for event, reliability in self.event_reliabilities.items():
-            if event in self.gates:
-                print(f"Intermediate Event {event}: {reliability:.4f}")
-
-        system_reliability = self.calculate_system_reliability()
-        print(f"\n\nSystem Reliability: {system_reliability:.4f}")
+        self.calculate_ps_reliability()
+        self.calculate_intermediate_event_reliabilities()
 
 
 if __name__ == "__main__":
