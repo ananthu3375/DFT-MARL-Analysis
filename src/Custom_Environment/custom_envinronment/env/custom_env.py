@@ -2,6 +2,8 @@ from pettingzoo import AECEnv
 from pettingzoo.utils import agent_selector, wrappers
 from gymnasium.spaces import Discrete, MultiBinary
 import numpy as np
+
+
 class CustomEnvironment(AECEnv):
     metadata = {
         "name": "custom_environment_v0",
@@ -38,7 +40,7 @@ class CustomEnvironment(AECEnv):
         self.terminations = {agent: False for agent in self.agents}                                                                    
         self.truncations = {agent: False for agent in self.agents} 
     
-    #Reset basic events to initial state received from the xml file then update intermediate events
+    # Reset basic events to initial state received from the xml file then update intermediate events
     def reset(self, seed=None, options=None):
 
         self.agents = self.possible_agents.copy()
@@ -94,13 +96,13 @@ class CustomEnvironment(AECEnv):
             True in self.terminations.values()
             or True in self.truncations
         ):
-            #self._was_dead_step(action)
+            # self._was_dead_step(action)
             return self.observation, self.rewards[agent], self.terminations, self.truncations, self.infos
         
         
 
         action, cost = self.game.get_action(act)
-        #print(agent.name,action, cost)
+        # print(agent.name,action, cost)
         if agent.valid_actions_mask[act] == 0:
             action = 'No Action'
             count = 0
@@ -114,7 +116,7 @@ class CustomEnvironment(AECEnv):
                 count = self.game.apply_action(agent, action)
             self.rewards[agent] += 1
             self.rewards[agent] += count
-            #no reactive repairing instead preventive maintainance
+            # no reactive repairing instead preventive maintenance
             if agent.name == "red_agent":        
                 if self.system.state == 1:
                     self.rewards[agent] -= 1
@@ -127,7 +129,7 @@ class CustomEnvironment(AECEnv):
                     self.rewards[agent] += 0.1
                 else:
                     self.rewards[agent] -= 10
-                    #self.terminations = {agent: True for agent in self.agents}
+                    # self.terminations = {agent: True for agent in self.agents}
 
         # Increment timestep after all agents have taken their actions
         self.timestep += 1
@@ -144,7 +146,7 @@ class CustomEnvironment(AECEnv):
         self.infos = {agent : {} for agent in self.agents}
 
         # DEBUGGING!
-        #self.infos = {"agent_red": {'time' : self.timestep, 'state' : self.system_state}, "agent_blue": {'time' : self.timestep, 'state' : self.system_state}}
+        # self.infos = {"agent_red": {'time' : self.timestep, 'state' : self.system_state}, "agent_blue": {'time' : self.timestep, 'state' : self.system_state}}
         self.agent_selection = self._agent_selector.next()
         # Return observations, rewards, done, and info (customize as needed)
         # return agent.name,self.system_state, self.rewards[red_agent],self.rewards[blue_agent],self.observations, self.rewards, self.terminations, self.truncations, self.infos
