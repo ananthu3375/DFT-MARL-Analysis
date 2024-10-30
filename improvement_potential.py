@@ -268,28 +268,26 @@ if __name__ == "__main__":
     events = list(improvement_potential_analysis.improvement_potentials.keys())
     improvement_potentials = list(improvement_potential_analysis.improvement_potentials.values())
     event_usages = [reliability_analysis.red_agent_event_count.get(event, 0) for event in events]
+    data = pd.DataFrame({"Event": events, "Improvement Potential": improvement_potentials, "Event Usage": event_usages})
+    data = data.sort_values(by="Improvement Potential", ascending=False)
 
-    # Create a DataFrame and sort events alphabetically by event name
-    data = pd.DataFrame({"Event": events, "Improvement Potential (IP)": improvement_potentials, "Event Usage": event_usages})
-    data = data.sort_values(by="Event")
     fig, ax2 = plt.subplots(figsize=(12, 6))
 
-    # Event Usage as semi-transparent light red bars on the left y-axis
-    ax2.bar(data["Event"], data["Event Usage"], color="red", alpha=1.0, width=0.4, zorder=1)
+    ax2.bar(data["Event"], data["Event Usage"], color="#CD1C18", alpha=1.0, width=0.4, zorder=1)  # Event Usage on the left y-axis
     ax2.set_ylabel("Event Usage by Red Agent", color="red", alpha=1.0)
     ax2.tick_params(axis="y", labelcolor="red")
 
-    # Improvement Potential as green dots on the right y-axis
-    ax1 = ax2.twinx()
-    ax1.scatter(data["Event"], data["Improvement Potential (IP)"], color="black", s=70, edgecolor="black", linewidth=0.6,
-                zorder=2)
+    ax1 = ax2.twinx()  # Improvement Potential on the right y-axis
+    ax1.scatter(data["Event"], data["Improvement Potential"], color="#069C56", s=70, edgecolor="#069C56", linewidth=0.6, zorder=2)
     ax1.set_ylabel("Improvement Potential", color="green")
     ax1.tick_params(axis="y", labelcolor="green")
-    ax1.plot(data["Event"], data["Improvement Potential (IP)"], linestyle=':', color='black', alpha=0.5, zorder=1)
+    ax1.plot(data["Event"], data["Improvement Potential"], linestyle=':', color='#069C56', alpha=0.5, zorder=1)
+
     ax2.set_xlabel("Basic Events")
     ax1.legend(['--> IP'], loc='upper right', fontsize='medium', handlelength=2, handletextpad=0.5, frameon=False)
-    save_dir = '2_100K_DFT_MARL-ddqn_analysisGraphs'
+    ax2.grid(False)
+
     plt.title("Improvement Potentials and Event Usages for Each Basic Event")
-    ax2.grid(axis="y", linestyle="--", alpha=0.7)
+    save_dir = '2_100K_DFT_MARL-ddqn_analysisGraphs'
     plt.savefig(f"{save_dir}/improvement_potentials_event_usages.png", bbox_inches='tight')
-    plt.show()
+    # plt.show()

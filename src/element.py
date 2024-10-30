@@ -18,12 +18,12 @@ class Event:
         for event in self.input:
             event.update_event()
         if self.event_type != 'BASIC':
-                if self.gate_type == 'AND': # If all inputs are 0, then state = 0, otherwise, state = 1
+                if self.gate_type == 'AND':  # If all inputs are 0, then state = 0, otherwise, state = 1
                     if sum([int(obj.state) for obj in self.input]) == 0:
                         self.state = 0
                     else:
                         self.state = 1 
-                elif self.gate_type == 'OR': # If any input is != 0, then state = 0, otherwise, state = 1
+                elif self.gate_type == 'OR':  # If any input is != 0, then state = 0, otherwise, state = 1
                     for obj in self.input:
                         if int(obj.state) != 1:
                             self.state = 0
@@ -32,10 +32,10 @@ class Event:
                             self.state = 1           
                 elif self.gate_type == 'FDEP':  # FDEP gates only accepts one input precedence, must combine with and or events prior to input signal.
                     self.state = self.input[0].state
-                    #print(self.name,self.input[0].name)
+                    # print(self.name,self.input[0].name)
                 elif self.gate_type == 'CSP':  # Cold Spare currently, only accepts 1 competitor, and 1 spare. Also the 'main' input must come first in the input list.
-                    self.main_functioning = self.input[0].state # Is main functioning?
-                    self.spare_functioning = self.spare.state # Is Spare functioning?     
+                    self.main_functioning = self.input[0].state  # Is main functioning?
+                    self.spare_functioning = self.spare.state  # Is Spare functioning?
                     if self.main_functioning == 1:
                         self.state = 1
                         self.using_spare = 0
@@ -60,19 +60,19 @@ class Event:
                     new_state = 0
                 else:
                     new_state = 1 
-            elif parent.gate_type == 'OR': # If any input is != 0, then state = 0, otherwise, state = 1
+            elif parent.gate_type == 'OR':  # If any input is != 0, then state = 0, otherwise, state = 1
                 for obj in parent.input:
                     if int(obj.state) != 1:
                         new_state = 0
                         break  
                     else:
                         new_state = 1           
-            elif parent.gate_type == 'FDEP': # FDEP gates only accepts one input precedence, must combine with and or events prior to input signal.
+            elif parent.gate_type == 'FDEP':  # FDEP gates only accepts one input precedence, must combine with and or events prior to input signal.
                 new_state = parent.input[0].state
-                #print(parent.name,parent.input[0].name)
-            elif parent.gate_type == 'CSP': # Cold Spare currently, only accepts 1 competitor, and 1 spare. Also the 'main' input must come first in the input list.
-                parent.main_functioning = parent.input[0].state # Is main functioning?
-                parent.spare_functioning = parent.spare.state # Is Spare functioning?     
+                # print(parent.name,parent.input[0].name)
+            elif parent.gate_type == 'CSP':  # Cold Spare currently, only accepts 1 competitor, and 1 spare. Also the 'main' input must come first in the input list.
+                parent.main_functioning = parent.input[0].state  # Is main functioning?
+                parent.spare_functioning = parent.spare.state  # Is Spare functioning?
                 if parent.main_functioning == 1:
                     new_state = 1
                     parent.using_spare = 0
@@ -94,22 +94,22 @@ class Event:
             self.state = new_state
             Event.count += 1
         for parent in self.output:
-            if parent.gate_type == 'AND': # If all inputs are 0, then state = 0, otherwise, state = 1
+            if parent.gate_type == 'AND':  # If all inputs are 0, then state = 0, otherwise, state = 1
                 if sum([int(obj.state) for obj in parent.input]) == 0:
                     new_state = 0
                 else:
                     new_state = 1 
-            elif parent.gate_type == 'OR': # If any input is != 0, then state = 0, otherwise, state = 1
+            elif parent.gate_type == 'OR':  # If any input is != 0, then state = 0, otherwise, state = 1
                 for obj in parent.input:
                     if int(obj.state) != 1:
                         new_state = 0
                         break  
                     else:
                         new_state = 1           
-            elif parent.gate_type == 'FDEP': # FDEP gates only accepts one input precedence, must combine with and or events prior to input signal.
+            elif parent.gate_type == 'FDEP':  # FDEP gates only accepts one input precedence, must combine with and or events prior to input signal.
                 new_state = parent.input[0].state
-                #print(parent.name,parent.input[0].name)
-            elif parent.gate_type == 'CSP': # Cold Spare currently, only accepts 1 competitor, and 1 spare. Also the 'main' input must come first in the input list.
+                # print(parent.name,parent.input[0].name)
+            elif parent.gate_type == 'CSP':  # Cold Spare currently, only accepts 1 competitor, and 1 spare. Also the 'main' input must come first in the input list.
                 parent.main_functioning = parent.input[0].state # Is main functioning?
                 parent.spare_functioning = parent.spare.state # Is Spare functioning?     
                 if parent.main_functioning == 1:
@@ -138,7 +138,7 @@ class BasicEvent(Event):
         return self.repairing
     
     def red_action(self):
-        'activate basic event'
+        """activate basic event"""
         Event.count = 0
         Event.red_visited = []
         self.event_partial_update(0)
@@ -146,7 +146,7 @@ class BasicEvent(Event):
         return Event.count
 
     def blue_action(self):
-        'inactivate basic event'
+        """inactivate basic event"""
         if self.state == 1:
             return 0,[]
         self.repairing = 1
@@ -171,7 +171,7 @@ class Precedence:
 
 
 class No_Action(Event):
-    'No Action class' 
+    """No Action class"""
     count = 0
     visited = []
     def __init__(self, name):
@@ -182,5 +182,5 @@ class No_Action(Event):
         return No_Action.count
 
     def blue_action(self):
-        'skip turn'
+        """skip turn"""
         return No_Action.count, No_Action.visited

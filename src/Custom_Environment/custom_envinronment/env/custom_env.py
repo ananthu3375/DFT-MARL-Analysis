@@ -98,8 +98,6 @@ class CustomEnvironment(AECEnv):
         ):
             # self._was_dead_step(action)
             return self.observation, self.rewards[agent], self.terminations, self.truncations, self.infos
-        
-        
 
         action, cost = self.game.get_action(act)
         # print(agent.name,action, cost)
