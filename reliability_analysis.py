@@ -117,7 +117,7 @@ class ReliabilityAnalysis:
         Calculate the failure rate of each event for the red agent using the formula:
         Failure Rate Event_i = (Usage of Event_i / Total Usages) * Failure Rate (System)
         """
-        print("\n\nFailure Rate of Events for Red Agent:")
+        print("\n\nFailure Rates of Basic Events using Red Agent Policy:")
         for event in sorted(self.red_agent_event_count.keys()):
             usage_count = self.red_agent_event_count[event]
             be_failure_rate = (usage_count / self.total_event_usages) * self.failure_rate
@@ -215,7 +215,7 @@ class ReliabilityAnalysis:
         """
         Calculate the failure rate for the PS gate, which fails if both A and B fail.
         """
-        print(f"\n\nFailure Rate of Intermediate Events:")
+        print(f"\nFailure Rates of Intermediate Events using Red Agent Policy:")
         failure_rate_A = self.BE_failure_rates.get("A", 0)
         failure_rate_B = self.BE_failure_rates.get("B", 0)
         ps_failure_rate = failure_rate_A * failure_rate_B
@@ -368,13 +368,13 @@ class ReliabilityAnalysis:
 
     def calculate_G1_failure_rate(self):
         """
-        Calculate the reliabilities of the top event G1 based on their child events.
+        Calculate the reliability of the top event G1 based on its child events.
         """
         failure_rate_G2 = self.gate_failure_rates.get("G2", 0)
         failure_rate_G3 = self.gate_failure_rates.get("G3", 0)
         g1_failure_rate = failure_rate_G2 * failure_rate_G3
         self.gate_failure_rates['G1'] = g1_failure_rate
-        print(f"G1 = {g1_failure_rate:.4f}")
+        print(f"\nTop Event Failure Rate: G1 = {g1_failure_rate:.4f}")
 
     def run(self):
         self.calculate_total_event_usage()
@@ -392,47 +392,6 @@ class ReliabilityAnalysis:
         self.calculate_G1_failure_rate()
 
 
-class ImprovementPotential:
-    def __init__(self, reliability_analysis):
-        """
-        Initialize with an instance of ReliabilityAnalysis to access the calculated
-        event and system failure rates.
-        """
-        self.reliability_analysis = reliability_analysis
-        self.improvement_potentials = {}
-
-    def calculate_improvement_potential(self):
-        """
-        Calculate the improvement potential for each basic event.
-        """
-        original_system_failure_rate = self.reliability_analysis.calculate_system_failure_rate()
-
-        # Calculate IP for each basic event
-        for event in self.reliability_analysis.BE_failure_rates:
-            # Temporarily set event's failure rate to 0 (perfect reliability for this event)
-            original_failure_rate = self.reliability_analysis.BE_failure_rates[event]
-            self.reliability_analysis.BE_failure_rates[event] = 0
-
-            # Recalculate system failure rate with this event at perfect reliability
-            modified_system_failure_rate = self.reliability_analysis.calculate_system_failure_rate()
-
-            # Compute improvement potential using the formula
-            improvement_potential = (
-                                                original_system_failure_rate - modified_system_failure_rate) / original_system_failure_rate
-            self.improvement_potentials[event] = improvement_potential
-            print(f"Improvement Potential for Event {event}: {improvement_potential:.4f}")
-
-            # Restore the original failure rate for the event
-            self.reliability_analysis.BE_failure_rates[event] = original_failure_rate
-
-    def run(self):
-        """
-        Run the calculation for all events and store the results.
-        """
-        print("\n\nImprovement Potentials of Events:")
-        self.calculate_improvement_potential()
-
-
 if __name__ == "__main__":
     # Run the game to generate the action data
     results = actual_game()
@@ -440,11 +399,8 @@ if __name__ == "__main__":
     # Extract the actions and wins from actual_game output
     actions = results['actions']
     wins = results['wins']
+    print(f"\n\nCALCULATIONS BASED ON RED AGENT'S POLICY")
 
     # Calculate reliability
     reliability_analysis = ReliabilityAnalysis(actions, wins, 'model.xml')
     reliability_analysis.run()
-
-    # Calculate improvement potential
-    improvement_potential_analysis = ImprovementPotential(reliability_analysis)
-    improvement_potential_analysis.run()
