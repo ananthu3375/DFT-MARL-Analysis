@@ -23,7 +23,7 @@
     <event name="D" type="BASIC" mttr = "2" repair_cost = "3" failure_cost = "5" initial_state = "1"/>
     <event name="E01" type="BASIC" mttr = "2" repair_cost = "6" failure_cost = "5" initial_state = "1"/>
     <event name="E02" type="BASIC" mttr = "3" repair_cost = "4" failure_cost = "4" initial_state = "1"/>
-    <event name="F" type="BASIC" mttr = "2" repair_cost = "3" failure_cost = "3" initial_state = "1"/>
+    <event name="F" type="BASIC" mttr = "2" repair_cost = "2" failure_cost = "9" initial_state = "1"/>
     <event name="G" type="BASIC" mttr = "3" repair_cost = "7" failure_cost = "6" initial_state = "1"/>
     <event name="H" type="BASIC" mttr = "2" repair_cost = "3" failure_cost = "3" initial_state = "1"/>
     <event name="I01" type="BASIC" mttr = "2" repair_cost = "4" failure_cost = "3" initial_state = "1"/>
