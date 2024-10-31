@@ -315,7 +315,7 @@ def actual_game():
     max_cycles = env.game.get_max_steps() + 4
 
     # Set the number of evaluation games
-    num_games = 500
+    num_games = 5000
 
     # Load the saved models for both agents (red and blue)
     red_agent = Agent(name="red_agent_2_100K", gamma=0.99, epsilon=1.0, lr=5e-6,

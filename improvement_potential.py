@@ -273,7 +273,7 @@ if __name__ == "__main__":
 
     fig, ax2 = plt.subplots(figsize=(12, 6))
 
-    ax2.bar(data["Event"], data["Event Usage"], color="#CD1C18", alpha=1.0, width=0.4, zorder=1)  # Event Usage on the left y-axis
+    ax2.bar(data["Event"], data["Event Usage"], color="#CD1C18", alpha=1.0, width=0.7, zorder=1)  # Event Usage on the left y-axis
     ax2.set_ylabel("Event Usage by Red Agent", color="red", alpha=1.0)
     ax2.tick_params(axis="y", labelcolor="red")
 
