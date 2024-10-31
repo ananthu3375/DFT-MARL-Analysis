@@ -2,7 +2,6 @@
 File:     reliability_analysis.py
 Author:   Ananthu Ramesh S
 Purpose:  To evaluate the reliability of the events and the overall system
-          To calculate Birnbaum's Importance and Improvement Potential
 """
 
 import numpy as np

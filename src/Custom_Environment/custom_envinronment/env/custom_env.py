@@ -126,8 +126,7 @@ class CustomEnvironment(AECEnv):
                 if self.system.state == 1:
                     self.rewards[agent] += 0.1
                 else:
-                    self.rewards[agent] -= 10
-                    # self.terminations = {agent: True for agent in self.agents}
+                    self.rewards[agent] -= 10  # punishes the blue_agent heavily for losing the game
 
         # Increment timestep after all agents have taken their actions
         self.timestep += 1
@@ -138,7 +137,7 @@ class CustomEnvironment(AECEnv):
         if self.timestep > self.NUM_ITERS:        
             self.truncations = {agent: True for agent in self.agents}
             if self.system_state == 1:
-                self.rewards[blue_agent] += 100
+                self.rewards[blue_agent] += 100  # blue_agent is highly rewarded for keeping the system functioning until truncation
         self.observation = self.system.observe()
         # Infos
         self.infos = {agent : {} for agent in self.agents}

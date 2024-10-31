@@ -1,7 +1,7 @@
 """
-File:     improvement_potential.py
+File:     ip_reliability_analysis.py
 Author:   Ananthu Ramesh S
-Purpose:  To evaluate the reliability of the events and the overall system
+Purpose:  To evaluate the failure rate and reliability of the events and the overall system
           To calculate Improvement Potential of each Basic Event
 """
 

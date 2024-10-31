@@ -85,7 +85,7 @@ class Event:
             parent.event_partial_update(new_state)
 
     def event_partial_update_demo(self, new_state):
-        
+
         if self.state == new_state or self.name in Event.blue_visited:
             return
         else:

@@ -212,6 +212,7 @@ class DoubleDeepQNetwork(nn.Module):
         self.checkpoint_file = os.path.join(self.chkpt_dir, name)
         # input_dims =
         # print("..............",len(input_dims))
+        print("Input dimensions length:", len(input_dims))
         self.fcl = nn.Linear(len(input_dims), 512)                                                     
         self.bn1 = nn.BatchNorm1d(512)  # Batch normalization layer                                         
         self.fc2 = nn.Linear(512, 512)  # New hidden layer                                                      
@@ -315,7 +316,7 @@ def actual_game():
     max_cycles = env.game.get_max_steps() + 4
 
     # Set the number of evaluation games
-    num_games = 5000
+    num_games = 500
 
     # Load the saved models for both agents (red and blue)
     red_agent = Agent(name="red_agent_2_100K", gamma=0.99, epsilon=1.0, lr=5e-6,
