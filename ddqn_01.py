@@ -331,7 +331,7 @@ def plot_event_usage(event_count, title, plot_filename):
     plt.title(title)
     plt.xticks(rotation=45)
     plt.tight_layout()
-    save_dir = '01_100K_DFT_MARL-ddqn_analysisGraphs'
+    save_dir = '03_100K_DFT_MARL-ddqn_analysisGraphs'
     os.makedirs(save_dir, exist_ok=True)
     file_path = os.path.join(save_dir, plot_filename)
     plt.savefig(file_path, format='png')
@@ -412,10 +412,10 @@ def play():
 
     new_batch_size = 32  # New batch size                                                                     
 
-    red_agent = Agent(name="red_agent_01_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
+    red_agent = Agent(name="red_agent_03_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
                       batch_size=new_batch_size, eps_dec=1e-3, replace=100)
-    blue_agent = Agent(name="blue_agent_01_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
+    blue_agent = Agent(name="blue_agent_03_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
                        input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
                        batch_size=new_batch_size, eps_dec=1e-3, replace=100)
     agents = {"red_agent": red_agent, "blue_agent": blue_agent}
@@ -520,10 +520,10 @@ if __name__ == '__main__':
 
     new_batch_size = 32                                                                          
 
-    red_agent = Agent(name="red_agent_01_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
+    red_agent = Agent(name="red_agent_03_100K", gamma=0.99, epsilon=1.0, lr=5e-6,
                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
                       batch_size=new_batch_size, eps_dec=1e-4, replace=100)
-    blue_agent = Agent(name="blue_agent_01_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
+    blue_agent = Agent(name="blue_agent_03_100K", gamma=0.99, epsilon=1.0, lr=5e-6,
                        input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
                        batch_size=new_batch_size, eps_dec=1e-4, replace=100)
     agents = {"red_agent": red_agent, "blue_agent": blue_agent}
@@ -583,7 +583,7 @@ if __name__ == '__main__':
             for k, v in agents.items():
                 v.save_models()
 
-    save_dir = '01_100K_DFT_MARL-ddqn_analysisGraphs'
+    save_dir = '03_100K_DFT_MARL-ddqn_analysisGraphs'
     plot_loss(red_agent, save_dir, "red_agent")                                                                                 
     plot_loss(blue_agent, save_dir, "blue_agent")                                                                            
     plot_loss_avg(red_agent, save_dir, "red_agent")                                                                          

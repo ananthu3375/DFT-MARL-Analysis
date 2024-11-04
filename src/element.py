@@ -139,6 +139,14 @@ class BasicEvent(Event):
     
     def red_action(self):
         """activate basic event"""
+        # Check for conditional dependencies
+        if self.name == 'F':                                                                            ###
+            if not any(event.name == 'I01' and event.state == 0 for event in self.input):
+                return 0  # Skip failure if I01 has not failed
+        elif self.name == 'K':
+            if not any(event.name == 'L02' and event.state == 0 for event in self.input):
+                return 0  # Skip failure if L02 has not failed
+
         Event.count = 0
         Event.red_visited = []
         self.event_partial_update(0)
