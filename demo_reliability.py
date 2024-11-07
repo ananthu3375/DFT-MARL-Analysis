@@ -20,7 +20,7 @@ plt.ylim(0.6, 1.2)
 # Add labels and title
 plt.xlabel('Event')
 plt.ylabel('Reliability')
-plt.title('Reliability of Events for Red Agent (Sorted by Reliability)')
+plt.title('Reliability of Events for Red Agent')
 
 # Display values above each point
 for i, reliability in enumerate(reliabilities):
