@@ -12,33 +12,51 @@
     <event name="M3" type="INTERMEDIATE" gate_type="OR"/>
     <event name="FDEP" type="INTERMEDIATE" gate_type="FDEP"/>
     <event name="PS" type="INTERMEDIATE" gate_type="AND"/>
+    <event name="C_Redundant" type="INTERMEDIATE" gate_type="AND"/>
+    <event name="E_Redundant" type="INTERMEDIATE" gate_type="AND"/>
+    <event name="I_Redundant" type="INTERMEDIATE" gate_type="AND"/>
+    <event name="L_Redundant" type="INTERMEDIATE" gate_type="AND"/>
     <event name="A" type="BASIC" mttr = "3" repair_cost = "1" failure_cost = "3" initial_state = "1"/>
     <event name="B" type="BASIC" mttr = "7" repair_cost = "3" failure_cost = "8" initial_state = "1"/>
-    <event name="C" type="BASIC" mttr = "2" repair_cost = "1" failure_cost = "2" initial_state = "1"/>
-    <event name="D" type="BASIC" mttr = "4" repair_cost = "4" failure_cost = "5" initial_state = "1"/>
-    <event name="E" type="BASIC" mttr = "3" repair_cost = "7" failure_cost = "6" initial_state = "1"/>
-    <event name="F" type="BASIC" mttr = "2" repair_cost = "3" failure_cost = "3" initial_state = "1"/>
+    <event name="C01" type="BASIC" mttr = "2" repair_cost = "1" failure_cost = "2" initial_state = "1"/>
+    <event name="C02" type="BASIC" mttr = "2" repair_cost = "1" failure_cost = "2" initial_state = "1"/>
+    <event name="D" type="BASIC" mttr = "2" repair_cost = "3" failure_cost = "5" initial_state = "1"/>
+    <event name="E01" type="BASIC" mttr = "2" repair_cost = "6" failure_cost = "5" initial_state = "1"/>
+    <event name="E02" type="BASIC" mttr = "3" repair_cost = "4" failure_cost = "4" initial_state = "1"/>
+    <event name="F" type="BASIC" mttr = "2" repair_cost = "2" failure_cost = "9" initial_state = "1"/>
     <event name="G" type="BASIC" mttr = "3" repair_cost = "7" failure_cost = "6" initial_state = "1"/>
     <event name="H" type="BASIC" mttr = "2" repair_cost = "3" failure_cost = "3" initial_state = "1"/>
-    <event name="I" type="BASIC" mttr = "3" repair_cost = "7" failure_cost = "6" initial_state = "1"/>
-    <event name="J" type="BASIC" mttr = "2" repair_cost = "3" failure_cost = "3" initial_state = "1"/>
+    <event name="I01" type="BASIC" mttr = "2" repair_cost = "4" failure_cost = "3" initial_state = "1"/>
+    <event name="I02" type="BASIC" mttr = "2" repair_cost = "3" failure_cost = "3" initial_state = "1"/>
+    <event name="J" type="BASIC" mttr = "2" repair_cost = "3" failure_cost = "8" initial_state = "1"/>
     <event name="K" type="BASIC" mttr = "2" repair_cost = "1" failure_cost = "2" initial_state = "1"/>
-    <event name="L" type="BASIC" mttr = "4" repair_cost = "4" failure_cost = "5" initial_state = "1"/>
+    <event name="L01" type="BASIC" mttr = "3" repair_cost = "2" failure_cost = "3" initial_state = "1"/>
+    <event name="L02" type="BASIC" mttr = "2" repair_cost = "3" failure_cost = "3" initial_state = "1"/>
     <precedence source="A" target="PS" type="NORMAL"/>
     <precedence source="B" target="PS" type="NORMAL"/>
     <precedence source="PS" target="FDEP" type="NORMAL"/>
     <precedence source="FDEP" target="C1" type="FDEP"/>
     <precedence source="FDEP" target="C2" type="FDEP"/>
-    <precedence source="C" target="C1" type="NORMAL"/>
+    <precedence source="C01" target="C_Redundant" type="NORMAL"/>
+    <precedence source="C02" target="C_Redundant" type="NORMAL"/>
+    <precedence source="C_Redundant" target="C1" type="NORMAL"/>
     <precedence source="D" target="C1" type="NORMAL"/>
-    <precedence source="E" target="M1" type="NORMAL"/>
+    <precedence source="E01" target="E_Redundant" type="NORMAL"/>
+    <precedence source="E02" target="E_Redundant" type="NORMAL"/>
+    <precedence source="I01" target="F" type="NORMAL"/>
+    <precedence source="E_Redundant" target="M1" type="NORMAL"/>
     <precedence source="F" target="M1" type="NORMAL"/>
     <precedence source="G" target="M3" type="NORMAL"/>
     <precedence source="H" target="M3" type="NORMAL"/>
-    <precedence source="I" target="M2" type="NORMAL"/>
+    <precedence source="I01" target="I_Redundant" type="NORMAL"/>
+    <precedence source="I02" target="I_Redundant" type="NORMAL"/>
+    <precedence source="I_Redundant" target="M2" type="NORMAL"/>
     <precedence source="J" target="M2" type="NORMAL"/>
+    <precedence source="L02" target="K" type="NORMAL"/>
     <precedence source="K" target="C2" type="NORMAL"/>
-    <precedence source="L" target="C2" type="NORMAL"/>
+    <precedence source="L01" target="L_Redundant" type="NORMAL"/>
+    <precedence source="L02" target="L_Redundant" type="NORMAL"/>
+    <precedence source="L_Redundant" target="C2" type="NORMAL"/>
     <precedence source="H" target="M3" type="NORMAL"/>
     <precedence source="M1" target="CSP1" type="MAIN"/>
     <precedence source="M2" target="CSP2" type="MAIN"/>

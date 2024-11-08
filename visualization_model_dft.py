@@ -121,6 +121,68 @@ def draw_edges():
     )
 
 
+def check_cascading_failures():
+    # Check if A and B are red, triggering PS and downstream failures
+    if node_colors['A'] == 'red' and node_colors['B'] == 'red':
+        affected_nodes = ['PS', 'FDEP', 'C1', 'C2', 'G2', 'G3', 'G1']
+        for node in affected_nodes:
+            node_colors[node] = 'red'
+
+    # Check C1 (OR gate) - fails if C or D fails, triggering downstream nodes
+    if node_colors['C'] == 'red' or node_colors['D'] == 'red':
+        affected_nodes = ['C1', 'G2', 'G1']
+        for node in affected_nodes:
+            node_colors[node] = 'red'
+
+    # Check C2 (OR gate) - fails if K or L fails, triggering downstream nodes
+    if node_colors['K'] == 'red' or node_colors['L'] == 'red':
+        affected_nodes = ['C2', 'G3', 'G1']
+        for node in affected_nodes:
+            node_colors[node] = 'red'
+
+    # Check M1 (OR gate) - fails if E or F fails, affecting CSP1
+    if node_colors['E'] == 'red' or node_colors['F'] == 'red':
+        affected_nodes = ['M1', 'CSP1']
+        for node in affected_nodes:
+            node_colors[node] = 'red'
+
+    # Check M2 (OR gate) - fails if I or J fails, affecting CSP2
+    if node_colors['I'] == 'red' or node_colors['J'] == 'red':
+        affected_nodes = ['M2', 'CSP2']
+        for node in affected_nodes:
+            node_colors[node] = 'red'
+
+    # Check M3 (OR gate) - fails if G or H fails, affecting both CSP1 and CSP2
+    if node_colors['G'] == 'red' or node_colors['H'] == 'red':
+        affected_nodes = ['M3', 'CSP1', 'CSP2']
+        for node in affected_nodes:
+            node_colors[node] = 'red'
+
+    # Check CSP1 and CSP2 failures if any two of M1, M2, or M3 fail
+    failed_M_gates = sum(1 for m in ['M1', 'M2', 'M3'] if node_colors[m] == 'red')
+    if failed_M_gates >= 2:
+        affected_nodes = ['CSP1', 'CSP2', 'G2', 'G3', 'G1']
+        for node in affected_nodes:
+            node_colors[node] = 'red'
+
+    # Ensure G2 fails if C1 or CSP1 is red
+    if node_colors['C1'] == 'red' or node_colors['CSP1'] == 'red':
+        affected_nodes = ['G2', 'G1']
+        for node in affected_nodes:
+            node_colors[node] = 'red'
+
+    # Ensure G3 fails if C2 or CSP2 is red
+    if node_colors['C2'] == 'red' or node_colors['CSP2'] == 'red':
+        affected_nodes = ['G3', 'G1']
+        for node in affected_nodes:
+            node_colors[node] = 'red'
+
+    # Final top event: G1 fails if either G2 or G3 fails
+    if node_colors['G2'] == 'red' or node_colors['G3'] == 'red':
+        node_colors['G1'] = 'red'
+
+
+
 def update(frame):
     ax.clear()
     action = action_sequence[frame]
@@ -131,6 +193,9 @@ def update(frame):
         node_colors[node] = 'red'
     elif agent == "blue_agent" and node != "No Action":
         node_colors[node] = 'blue'
+
+    # Check for cascading failures after each action
+    # check_cascading_failures()
 
     # Draw nodes and edges with updated colors
     draw_nodes()

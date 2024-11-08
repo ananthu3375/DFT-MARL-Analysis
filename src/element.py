@@ -140,7 +140,7 @@ class BasicEvent(Event):
     def red_action(self):
         """activate basic event"""
         # Check for conditional dependencies
-        if self.name == 'F':                                                                            ###
+        if self.name == 'F':
             if not any(event.name == 'I01' and event.state == 0 for event in self.input):
                 return 0  # Skip failure if I01 has not failed
         elif self.name == 'K':

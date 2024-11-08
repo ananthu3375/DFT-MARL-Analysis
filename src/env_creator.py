@@ -12,6 +12,6 @@ class env_creator():
         system_obj.initialize_system()
         game = Game(system_obj, 500)
         red_agent=game.create_player("red_agent",50)
-        blue_agent=game.create_player("blue_agent",100)
+        blue_agent=game.create_player("blue_agent",50)
         env = CustomEnvironment(system_obj,game)
         return env

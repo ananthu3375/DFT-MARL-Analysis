@@ -298,7 +298,7 @@ def calculate_and_plot_event_usage(actions):
     plt.xticks([i + bar_width / 2 for i in index], all_events, rotation=45)
     plt.legend()
     plt.tight_layout()
-    save_dir = '2_100K_DFT_MARL-ddqn_analysisGraphs'
+    save_dir = '03_100K_DFT_MARL-ddqn_analysisGraphs'
     os.makedirs(save_dir, exist_ok=True)
     file_path = os.path.join(save_dir, 'game_event_usage.png')
     plt.savefig(file_path, format='png')
@@ -319,10 +319,10 @@ def actual_game():
     num_games = 500
 
     # Load the saved models for both agents (red and blue)
-    red_agent = Agent(name="red_agent_2_100K", gamma=0.99, epsilon=1.0, lr=5e-6,
+    red_agent = Agent(name="red_agent_03_100K", gamma=0.99, epsilon=1.0, lr=5e-6,
                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
                       batch_size=32, eps_dec=1e-3, replace=100)
-    blue_agent = Agent(name="blue_agent_2_100K", gamma=0.99, epsilon=1.0, lr=5e-6,
+    blue_agent = Agent(name="blue_agent_03_100K", gamma=0.99, epsilon=1.0, lr=5e-6,
                        input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
                        batch_size=32, eps_dec=1e-3, replace=100)
 
