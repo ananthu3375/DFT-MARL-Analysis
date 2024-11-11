@@ -1,22 +1,27 @@
+import os
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
 
-# Initialize the fault tree as a directed graph
-G = nx.DiGraph()
+save_dir = '03_100K_DFT_MARL-ddqn_analysisGraphs'
+animation_path = os.path.join(save_dir, 'fault_propagation_animation.gif')
+fig, ax = plt.subplots(figsize=(18, 12))
 
-# Define basic, intermediate, and top events
+G = nx.DiGraph()  # Initializing the fault tree as a directed graph
+
+# Basic, Intermediate, and Top Events
 basic_events = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 intermediate_events = {
-    'PS': 'AND', 'FDEP': None, 'C1': 'OR', 'C2': 'OR',
+    'PS': 'AND', 'FDEP': '', 'C1': 'OR', 'C2': 'OR',
     'M1': 'OR', 'M2': 'OR', 'M3': 'OR', 'CSP1': 'CSP', 'CSP2': 'CSP', 'G2': 'OR', 'G3': 'OR'
 }
 top_event = 'G1'
-
 gate_types = {**intermediate_events, top_event: 'AND'}
+
 G.add_nodes_from(basic_events + list(intermediate_events.keys()) + [top_event])  # Add nodes and edges to the graph
 
-# Define edges based on the XML precedence relationships
 edges = [
     ('A', 'PS'), ('B', 'PS'), ('PS', 'FDEP'),
     ('FDEP', 'C1'), ('FDEP', 'C2'),
@@ -34,7 +39,7 @@ edges = [
 
 G.add_edges_from(edges)
 
-# Define positions for nodes (adjusted for clarity)
+# Positions for nodes
 pos = {
     'A': (0, 0), 'B': (2, 0), 'C': (4, 0), 'D': (6, 0), 'E': (8, 0), 'F': (10, 0),  # BE on the lowest section
     'G': (12, 0), 'H': (14, 0), 'I': (16, 0), 'J': (18, 0), 'K': (20, 0), 'L': (22, 0),
@@ -45,17 +50,17 @@ pos = {
     'G1': (13, 8)
 }
 
-# Initialize node colors
 node_colors = {node: 'green' for node in G.nodes()}
 
-# Action sequence (from the game)
+# Simulated Action Sequence
 action_sequence = [
+    ("red_agent", "No Action"), ("blue_agent", "No Action"),
     ("red_agent", "E"), ("blue_agent", "No Action"),
     ("red_agent", "H"), ("blue_agent", "No Action"),
     ("red_agent", "J"), ("blue_agent", "H"),
     ("red_agent", "C"), ("blue_agent", "J"),
     ("red_agent", "K"), ("blue_agent", "No Action"),
-    # ("red_agent", "A"), ("blue_agent", "F"),
+    ("red_agent", "A"), ("blue_agent", "K"),
     # ("red_agent", "F"), ("blue_agent", "F"),
     ("red_agent", "B"), ("blue_agent", "No Action"),
     # ("red_agent", "F"), ("blue_agent", "No Action"),
@@ -104,14 +109,38 @@ def draw_graph():
         node_color=[node_colors[node] for node in list(intermediate_events.keys()) + [top_event]], ax=ax
     )
     nx.draw_networkx_edges(
-        G, pos, edgelist=[(u, v) for u, v in edges if (u, v) not in [('FDEP', 'C1'), ('FDEP', 'C2')]],
+        G, pos, edgelist=[(u, v) for u, v in edges if (u, v) not in [('FDEP', 'C1'), ('FDEP', 'C2'), ('PS', 'FDEP')]],
         edge_color='black', style='solid', width=1.5, ax=ax
     )
     nx.draw_networkx_edges(
-        G, pos, edgelist=[('FDEP', 'C1'), ('FDEP', 'C2')],
+        G, pos, edgelist=[('FDEP', 'C1'), ('FDEP', 'C2'), ('PS', 'FDEP')],
         edge_color='orange', style='dotted', width=1.5, ax=ax
     )
-    nx.draw_networkx_labels(G, pos, ax=ax)
+
+    basic_labels = {node: node for node in basic_events}
+    nx.draw_networkx_labels(G, pos, labels=basic_labels, font_size=10, ax=ax)  # Font Size - BE
+
+    for node in gate_types.keys():  # Gate type of intermediate and top events
+        x, y = pos[node]  # Position of each node
+        if node == 'FDEP':
+            ax.text(x, y, node, ha='center', va='center', fontsize=10, fontweight='normal', color='orange')
+            continue
+
+        ax.text(x, y + 0.1, node, ha='center', va='center', fontsize=10, fontweight='bold', color='black')  # Event name
+        ax.text(x, y - 0.15, f"{gate_types[node]}", ha='center', va='center', fontsize=8, color='black')  # Gate type
+
+    legend_elements = [
+        # Circles for initial state and status of BE
+        mlines.Line2D([], [], marker='o', color='green', markersize=10, label='Initial state of BE : all working', markerfacecolor='green', linestyle='None'),  # Green circle
+        mpatches.Rectangle((0, 0), width=0.2, height=0.2, facecolor='green', edgecolor='green', label='Initial state of Intermediate Events'),  # Green square
+        mlines.Line2D([], [], marker='o', color='red', markersize=10, label='Failed BE', markerfacecolor='red', linestyle='None'),  # Red circle
+        mlines.Line2D([], [], marker='o', color='blue', markersize=10, label='Fixed BE', markerfacecolor='blue', linestyle='None'),  # Blue circle
+        mpatches.Rectangle((0, 0), width=0.2, height=0.2, facecolor='red', edgecolor='red', label='Fault Propagation'),  # Red square
+        mlines.Line2D([], [], color='orange', linestyle=':', label='FDEP Trigger')  # Dotted orange line
+    ]
+
+    # Legend in the top-left corner
+    ax.legend(handles=legend_elements, loc='upper left', fontsize=8, handlelength=1.2, handleheight=1.2)
 
 
 # Cascading failure logic
@@ -165,9 +194,9 @@ def update(frame):
         node_colors[node] = 'blue'
     check_cascading_failures()
     draw_graph()
+    ax.set_title("Fault Injection and Fault Propagation in the Original DFT", fontsize=16, fontweight='normal')
 
 
-# Set up the figure and axis
-fig, ax = plt.subplots()
 ani = FuncAnimation(fig, update, frames=len(action_sequence), interval=1000, repeat=False)
+ani.save(animation_path, writer='pillow', fps=1, dpi=150)
 plt.show()
