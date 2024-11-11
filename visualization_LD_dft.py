@@ -6,7 +6,7 @@ import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 
 save_dir = '03_100K_DFT_MARL-ddqn_analysisGraphs'
-animation_path = os.path.join(save_dir, 'fault_propagation_animation.gif')
+animation_path = os.path.join(save_dir, 'ld_fault_propagation_animation.gif')
 fig, ax = plt.subplots(figsize=(18, 12))
 
 G = nx.DiGraph()  # Initializing the fault tree as a directed graph
@@ -101,11 +101,11 @@ action_sequence = [
 # Helper functions for drawing and updating
 def draw_graph():
     nx.draw_networkx_nodes(
-        G, pos, nodelist=basic_events, node_shape='o', node_size=400,
+        G, pos, nodelist=basic_events, node_shape='o', node_size=900,
         node_color=[node_colors[node] for node in basic_events], ax=ax
     )
     nx.draw_networkx_nodes(
-        G, pos, nodelist=list(intermediate_events.keys()) + [top_event], node_shape='s', node_size=900,
+        G, pos, nodelist=list(intermediate_events.keys()) + [top_event], node_shape='s', node_size=1500,
         node_color=[node_colors[node] for node in list(intermediate_events.keys()) + [top_event]], ax=ax
     )
     nx.draw_networkx_edges(
@@ -118,16 +118,16 @@ def draw_graph():
     )
 
     basic_labels = {node: node for node in basic_events}
-    nx.draw_networkx_labels(G, pos, labels=basic_labels, font_size=10, ax=ax)  # Font Size - BE
+    nx.draw_networkx_labels(G, pos, labels=basic_labels, font_size=12, ax=ax)  # Font Size - BE
 
     for node in gate_types.keys():  # Gate type of intermediate and top events
         x, y = pos[node]  # Position of each node
         if node == 'FDEP':
-            ax.text(x, y, node, ha='center', va='center', fontsize=10, fontweight='normal', color='orange')
+            ax.text(x, y, node, ha='center', va='center', fontsize=12, fontweight='normal', color='orange')
             continue
 
-        ax.text(x, y + 0.1, node, ha='center', va='center', fontsize=10, fontweight='bold', color='black')  # Event name
-        ax.text(x, y - 0.15, f"{gate_types[node]}", ha='center', va='center', fontsize=8, color='black')  # Gate type
+        ax.text(x, y + 0.1, node, ha='center', va='center', fontsize=12, fontweight='bold', color='black')  # Event name
+        ax.text(x, y - 0.15, f"{gate_types[node]}", ha='center', va='center', fontsize=10, color='black')  # Gate type
 
     legend_elements = [
         # Circles for initial state and status of BE
