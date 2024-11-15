@@ -1,3 +1,3 @@
 The purpose of this research project is to analyze the adversarial multi-agent game outcomes of Dynamic Fault Tree (DFT) games to identify and prioritize the vulnerabilities in a system, that can impact the system fault tolerance. By doing this, the aim is to create a model that can enhance the system reliability and safety. DFTs are an advanced technique in reliability engineering used to analyze the reliability of complex systems.
-![ld_fault_propagation_animation](https://github.com/user-attachments/assets/cf0b54cf-d46b-4896-8444-b75bf0067adc)
-![hd_fault_propagation_animation](https://github.com/user-attachments/assets/d7c91bc6-5ec2-4529-9b6a-209e79f0b7e6)
+![ld_fault_propagation_animation](https://github.com/user-attachments/assets/e9621695-e441-47c5-8334-77bb45439849)
+![hd_fault_propagation_animation](https://github.com/user-attachments/assets/cec4dbb5-ceea-4394-af62-a7c31229d7a5)
