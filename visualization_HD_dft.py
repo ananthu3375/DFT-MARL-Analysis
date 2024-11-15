@@ -7,20 +7,23 @@ import matplotlib.lines as mlines
 
 save_dir = '03_100K_DFT_MARL-ddqn_analysisGraphs'
 animation_path = os.path.join(save_dir, 'hd_fault_propagation_animation.gif')
-fig, ax = plt.subplots(figsize=(18, 12))
+fig, ax = plt.subplots(figsize=(14, 12))
 
 G = nx.DiGraph()  # Initializing the fault tree as a directed graph
 
 # Basic, Intermediate, and Top Events
-basic_events = ['A', 'B', 'C01', 'C02', 'D', 'E01', 'E02', 'F', 'G', 'H', 'I01', 'I02', 'J', 'K', 'L01', 'L02']
-intermediate_events = {
+basic_events = {  # 'Basic Event': MTTR values
+    'A': 3, 'B': 7, 'C01': 2, 'C02': 2, 'D': 2, 'E01': 2, 'E02': 3, 'F': 2, 'G': 3, 'H': 2,
+    'I01': 2, 'I02': 2, 'J': 2, 'K': 2, 'L01': 3, 'L02': 2
+    }
+intermediate_events = {  # 'Intermediate Event': Gate type
     'PS': 'AND', 'FDEP': '', 'C_re': 'AND', 'E_re': 'AND', 'I_re': 'AND', 'L_re': 'AND',
     'C1': 'OR', 'C2': 'OR', 'M1': 'OR', 'M2': 'OR', 'M3': 'OR', 'CSP1': 'CSP', 'CSP2': 'CSP', 'G2': 'OR', 'G3': 'OR'
     }
 top_event = 'G1'
 gate_types = {**intermediate_events, top_event: 'AND'}
 
-G.add_nodes_from(basic_events + list(intermediate_events.keys()) + [top_event])  # Adding nodes and edges to the graph
+G.add_nodes_from(list(basic_events.keys()) + list(intermediate_events.keys()) + [top_event])  # Adding nodes and edges to the graph
 
 edges = [
     ('A', 'PS'), ('B', 'PS'), ('PS', 'FDEP'),
@@ -57,19 +60,28 @@ pos = {
 }
 
 node_colors = {node: 'green' for node in G.nodes()}
+repair_timers = {node: 0 for node in basic_events}  # To track MTTR countdowns for blue agent repairs
 
 # Simulated Action Sequence
 action_sequence = [
     ("red_agent", "No Action"), ("blue_agent", "No Action"),
-    ("red_agent", "E01"), ("blue_agent", "No Action"),
-    ("red_agent", "H"), ("blue_agent", "E01"),
-    ("red_agent", "J"), ("blue_agent", "H"),
-    ("red_agent", "L02"), ("blue_agent", "J"),
-    ("red_agent", "I01"), ("blue_agent", "No Action"),
-    ("red_agent", "F"), ("blue_agent", "I01"),
-    ("red_agent", "K"), ("blue_agent", "No Action"),
-    ("red_agent", "B"), ("blue_agent", "K"),
     ("red_agent", "A"), ("blue_agent", "No Action"),
+    ("red_agent", "B"), ("blue_agent", "A"),
+    ("red_agent", "C01"), ("blue_agent", "B"),
+    ("red_agent", "C02"), ("blue_agent", "No Action"),
+    ("red_agent", "L02"), ("blue_agent", "No Action"),
+    ("red_agent", "K"), ("blue_agent", "C01"),
+    ("red_agent", "E01"), ("blue_agent", "C02"),
+    ("red_agent", "E02"), ("blue_agent", "K"),
+    ("red_agent", "I01"), ("blue_agent", "No Action"),
+    ("red_agent", "I02"), ("blue_agent", "E01"),
+    ("red_agent", "F"), ("blue_agent", "I01"),
+    ("red_agent", "L01"), ("blue_agent", "F"),
+    ("red_agent", "No Action"), ("blue_agent", "E02"),
+    ("red_agent", "D"), ("blue_agent", "I02"),
+    ("red_agent", "No Action"), ("blue_agent", "L01"),
+    ("red_agent", "No Action"), ("blue_agent", "D"),
+    ("red_agent", "No Action"), ("blue_agent", "L02")
 ]
 
 
@@ -129,25 +141,34 @@ def check_cascading_failures():
         children = list(G.predecessors(node))
 
         # PS Failure Logic - triggers FDEP which causes both C1 and C2 to fail
-        if node == 'PS' and node_colors[node] == 'red':
-            node_colors['FDEP'] = 'red'
-            node_colors['C1'] = 'red'
-            node_colors['C2'] = 'red'
+        if node == 'PS':
+            # If either A or B (children of PS) is green, PS should be green
+            if any(node_colors[child] == 'green' for child in children):
+                node_colors['PS'] = 'green'
+                node_colors['FDEP'] = 'green'
+                node_colors['C1'] = 'green'
+                node_colors['C2'] = 'green'
+            else:
+                # Otherwise, if both children are red, PS turns red and triggers FDEP and cascades
+                node_colors['PS'] = 'red'
+                node_colors['FDEP'] = 'red'
+                node_colors['C1'] = 'red'
+                node_colors['C2'] = 'red'
             continue
 
         if gate_type == 'AND':
             # AND gate: all children must fail for this node to fail
             if all(node_colors[child] == 'red' for child in children):
                 node_colors[node] = 'red'
-            elif any(node_colors[child] != 'red' for child in children):
+            elif any(node_colors[child] == 'green' for child in children):
                 node_colors[node] = 'green'
 
         elif gate_type == 'OR':
             # OR gate: any child failure causes this node to fail
-            if any(node_colors[child] == 'red' for child in children):
-                node_colors[node] = 'red'
-            elif all(node_colors[child] != 'red' for child in children):
+            if all(node_colors[child] == 'green' for child in children):
                 node_colors[node] = 'green'
+            elif any(node_colors[child] == 'red' or 'blue' for child in children):
+                node_colors[node] = 'red'
 
         elif gate_type == 'CSP':
             # Updated CSP logic: CSP1 and CSP2 fail if two or more of M1, M2, M3 fails
@@ -165,21 +186,28 @@ def check_cascading_failures():
 def update(frame):
     ax.clear()
     agent, node = action_sequence[frame]
-    if node == "F" and node_colors["I01"] != 'red':  # F is conditioned on I01
-        return
-    if node == "K" and node_colors["L02"] != 'red':  # K is conditioned on L02
-        return
+    if node == "F":
+        if node_colors["F"] != 'red' and node_colors["I01"] != 'red':  # F is conditioned on I01
+            return
+    if node == "K":
+        if node_colors["K"] != 'red' and node_colors["L02"] != 'red':  # K is conditioned on L02
+            return
 
     if agent == "red_agent":
         node_colors[node] = 'red'
     elif agent == "blue_agent" and node != "No Action":
         node_colors[node] = 'blue'
-
+        repair_timers[node] = basic_events[node]  # Set mttr timer
+    for n, timer in repair_timers.items():
+        if timer > 0:
+            repair_timers[n] -= 1
+            if repair_timers[n] == 0:
+                node_colors[n] = 'green'  # Turn BE back to the default color after repair
     check_cascading_failures()
     draw_graph()
     ax.set_title("Fault Injection and Fault Propagation in the Improved DFT", fontsize=16, fontweight='normal')
 
 
 ani = FuncAnimation(fig, update, frames=len(action_sequence), interval=1000, repeat=False)
-ani.save(animation_path, writer='pillow', fps=1, dpi=150)
+ani.save(animation_path, writer='pillow', fps=1, dpi=100)
 plt.show()
