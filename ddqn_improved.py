@@ -1,10 +1,12 @@
 '''
-Original ddqn model chanhed accordingly to inprove the training and loss curve
-Changed MSE loss to Huber loss
-Adjusted parameters like eps_dec,
-Added gradient clipping in leanr(), dropout and weight decay
-Added one more layer of neurons and batch normalization and
-Replaced ReLU with Leaky ReLU
+Original ddqn model changed accordingly to improve the training and loss curve: Some of the changes are as follows,
+    Changed MSE loss to Huber loss
+    Adjusted parameters like epsilon and eps_dec
+    Added gradient clipping in leanr(), dropout and weight decay
+    Added one more layer of neurons and batch normalization
+    Replaced ReLU with Leaky ReLU
+
+Further changes were made accordingly in other files.
 '''
 
 import os
@@ -20,14 +22,14 @@ import matplotlib.pyplot as plt
 import gym
 
 
-def set_seed(seed):
+def set_seed(seed):  
     random.seed(seed)
     np.random.seed(seed)
     T.manual_seed(seed)
     if T.cuda.is_available():
         T.cuda.manual_seed(seed)
         T.cuda.manual_seed_all(seed)
-    T.backends.cudnn.deterministic = True
+    T.backends.cudnn.deterministic = True 
     T.backends.cudnn.benchmark = False  # Ensures reproducibility
 
 
@@ -38,8 +40,8 @@ class ReplayBuffer():
         self.mem_size = max_size
         self.mem_cntr = 0  # index of last stored memory
         # print("input shape",input_shape)
-        self.state_memory = np.zeros((self.mem_size, input_shape), dtype=np.float32)
-        self.new_state_memory = np.zeros((self.mem_size, input_shape), dtype=np.float32)
+        self.state_memory = np.zeros((self.mem_size, input_shape),dtype=np.float32)
+        self.new_state_memory = np.zeros((self.mem_size, input_shape),dtype=np.float32)
         self.action_memory = np.zeros(self.mem_size, dtype=np.int64)
         self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)
         self.terminal_memory = np.zeros(self.mem_size, dtype=np.uint8)  # for done flags
@@ -91,12 +93,12 @@ class Agent():
         self.chkpt_dir = chkpt_dir
         self.learn_step_counter = 0
         self.action_space = [i for i in range(self.n_actions)]
-        self.steps_per_episode = []
-        self.rewards_per_episode = []
-        self.loss_history = []  # To store loss values
-        self.epsilon_history = []
-        self.episode_loss = []  # List to store losses for the current episode
-        self.episode_losses = []  # List to store average loss per episode
+        self.steps_per_episode = [] 
+        self.rewards_per_episode = [] 
+        self.loss_history = []  # To store loss values                                                            
+        self.epsilon_history = []  
+        self.episode_loss = []  # List to store losses for the current episode                                
+        self.episode_losses = []  # List to store average loss per episode                                    
         # print("input dimensions,,,,,,,,,,,,,,,,,,",input_dims)
         self.memory = ReplayBuffer(mem_size, len(input_dims))
         self.q_eval = DoubleDeepQNetwork(self.lr, self.n_actions,
@@ -107,7 +109,7 @@ class Agent():
                                          input_dims=self.input_dims,
                                          name=name + 'DoubleDeepQNetwork_q_next',
                                          chkpt_dir=self.chkpt_dir)
-        self.training_actions = []  # store actions during training
+        self.training_actions = []  # store actions during training               
 
         # random number less than epsilon it takes a random action
         # if the random number is greater than epsilon ot takes a greedy action
@@ -136,14 +138,13 @@ class Agent():
     def store_transition(self, state, action, reward, state_, done):
 
         # # Convert state to one-hot encoding if needed
-        # state = self.one_hot_encode(state)
-        # state_ = self.one_hot_encode(state_)
+        # state = self.one_hot_encode(state)                                                                                      
+        # state_ = self.one_hot_encode(state_)                                                                                     
 
         self.memory.store_transition(state, action, reward, state_, done)
-        self.training_actions.append(
-            action)  # Track action in training
+        self.training_actions.append(action)  # Track action in training                                                           
 
-    # def one_hot_encode(self, action):
+    # def one_hot_encode(self, action):                                                                                          
     #     one_hot_vector = np.zeros(25)  # Assuming 12 categories
     #     one_hot_vector[action] = 1
     #     return one_hot_vector
@@ -204,25 +205,24 @@ class Agent():
 
             loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
 
-            # print(f"Training step {self.learn_step_counter}: Loss = {loss.item()}") # To print loss for each step
+            # print(f"Training step {self.learn_step_counter}: Loss = {loss.item()}") # To print loss for each step   
 
-            self.episode_loss.append(loss.item())  # Append the loss value for the current episode
+            self.episode_loss.append(loss.item())  # Append the loss value for the current episode                  
 
-            self.loss_history.append(loss.item())  # Append the loss value
-            self.epsilon_history.append(
-                self.epsilon)  # Track epsilon
+            self.loss_history.append(loss.item())  # Append the loss value                                          
+            self.epsilon_history.append(self.epsilon)  # Track epsilon                                                   
 
             loss.backward()
 
-            max_grad_norm = 2.0  # gradient clipping
-            utils.clip_grad_norm_(self.q_eval.parameters(), max_grad_norm)
+            max_grad_norm = 3.0  # gradient clipping                                                                  
+            utils.clip_grad_norm_(self.q_eval.parameters(), max_grad_norm) 
 
             self.q_eval.optimizer.step()
             self.learn_step_counter += 1
             self.decrement_epsilon()
-            # print(f"Loss: {loss.item()}")
+            # print(f"Loss: {loss.item()}")                                                                                         
 
-    def end_of_episode(self):
+    def end_of_episode(self): 
         # Print average loss for the episode
         if self.episode_loss:
             avg_loss = np.mean(self.episode_loss)
@@ -238,17 +238,16 @@ class DoubleDeepQNetwork(nn.Module):
         self.checkpoint_file = os.path.join(self.chkpt_dir, name)
         # input_dims =
         # print("..............",len(input_dims))
-        self.fcl = nn.Linear(len(input_dims), 512)
-        self.bn1 = nn.BatchNorm1d(
-            512)  # Batch normalization layer
-        self.fc2 = nn.Linear(512, 512)  # New hidden layer
-        self.bn2 = nn.BatchNorm1d(512)
-        self.dropout = nn.Dropout(p=0.2)  # Dropout layer with 30% dropout rate
+        self.fcl = nn.Linear(len(input_dims), 512) 
+        self.bn1 = nn.BatchNorm1d(512)  # Batch normalization layer                                                       
+        self.fc2 = nn.Linear(512,512)  # New hidden layer                                                           
+        self.bn2 = nn.BatchNorm1d(512) 
+        self.dropout = nn.Dropout(p=0.2)  # Dropout layer with 30% dropout rate                                        
         self.V = nn.Linear(512, 1)  # the value
         self.A = nn.Linear(512, n_actions)  # the advantage of actions, relative value of each action
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=1e-5)  # weight decay
-        self.loss = nn.SmoothL1Loss()  # Huber loss : Replaced MSELoss with HuberLoss
+        self.loss = nn.SmoothL1Loss()  # Huber loss : Replaced MSELoss with HuberLoss                                 
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
 
@@ -257,20 +256,20 @@ class DoubleDeepQNetwork(nn.Module):
         # print("state...................",state)
         # flat1 = F.relu(self.fcl(state))
         flat1 = F.leaky_relu(self.fcl(state), negative_slope=0.01)  # Replaced ReLU with Leaky ReLU
-        flat1 = self.dropout(flat1)  # Applying dropout
-        if flat1.size(0) > 1:
-            flat1 = self.bn1(flat1)
+        flat1 = self.dropout(flat1)  # Applying dropout                                                            
+        if flat1.size(0) > 1:  
+            flat1 = self.bn1(flat1)  
 
-            # V = self.V(flat1)
+        # V = self.V(flat1)
         # A = self.A(flat1)
 
         flat2 = F.leaky_relu(self.fc2(flat1), negative_slope=0.01)  # Second hidden layer
-        flat2 = self.dropout(flat2)
-        if flat2.size(0) > 1:
-            flat2 = self.bn2(flat2)
+        flat2 = self.dropout(flat2)  
+        if flat2.size(0) > 1:  
+            flat2 = self.bn2(flat2)  
 
-        V = self.V(flat2)
-        A = self.A(flat2)
+        V = self.V(flat2)  
+        A = self.A(flat2) 
 
         return V, A
 
@@ -281,11 +280,11 @@ class DoubleDeepQNetwork(nn.Module):
 
     def load_checkpoint(self):
         # print('... loading checkpoint ....')
-        print(f'... loading checkpoint from {self.checkpoint_file} ...')
+        print(f'... loading checkpoint from {self.checkpoint_file} ...')  
         self.load_state_dict(T.load(self.checkpoint_file, map_location=T.device('cpu')))
 
 
-def training_event_mapping(n_actions):
+def training_event_mapping(n_actions):  
     """Create a mapping from action indices to event names."""
     events = ["No Action"]  # Start with "No Action" for index 0
     for i in range(1, n_actions):
@@ -293,12 +292,12 @@ def training_event_mapping(n_actions):
     return {i: event for i, event in enumerate(events)}
 
 
-def print_training_event_usage(agent):
+def print_training_event_usage(agent):  
     num_actions = agent.n_actions
     event_mapping = training_event_mapping(num_actions)
     event_count = {}
     for action in agent.training_actions:
-        event_name = event_mapping.get(action, f"Unknown Event {action}")
+        event_name = event_mapping.get(action, f"Unknown Event {action}")  
         if event_name in event_count:
             event_count[event_name] += 1
         else:
@@ -308,7 +307,7 @@ def print_training_event_usage(agent):
         print(f"{event}: {count} times")
 
 
-def print_event_usage(actions):
+def print_event_usage(actions):  
     event_count = {}
     for game_actions in actions["red_agent"]:
         for event in game_actions:
@@ -322,7 +321,7 @@ def print_event_usage(actions):
         print(f"Event {event}: {count} times")
 
 
-def plot_event_usage(event_count, title, plot_filename):
+def plot_event_usage(event_count, title, plot_filename):  
     events = sorted(list(event_count.keys()))
     counts = [event_count[event] for event in events]
     max_count = max(counts)
@@ -334,7 +333,7 @@ def plot_event_usage(event_count, title, plot_filename):
     plt.title(title)
     plt.xticks(rotation=45)
     plt.tight_layout()
-    save_dir = '5_100K_DFT_MARL-ddqn_analysisGraphs'
+    save_dir = 'HD_DFT_MARL-ddqn_analysisGraphs'
     os.makedirs(save_dir, exist_ok=True)
     file_path = os.path.join(save_dir, plot_filename)
     plt.savefig(file_path, format='png')
@@ -353,7 +352,7 @@ def plot_loss(agent, save_dir, agent_name):
     plt.clf()
 
 
-def plot_loss_avg(agent, save_dir, agent_name):
+def plot_loss_avg(agent, save_dir, agent_name):  
     plt.figure(figsize=(10, 6))
     episodes = np.arange(len(agent.episode_losses))  # Episode numbers
     plt.plot(episodes, agent.episode_losses, label=f'{agent_name} Average Loss')
@@ -365,14 +364,14 @@ def plot_loss_avg(agent, save_dir, agent_name):
     plt.savefig(os.path.join(save_dir, f'{agent_name}_average_loss_curve_0.png'))
     # plt.show()
 
-
-def moving_average(data, window_size):  # Function to compute a simple moving average (SMA)
+                                                                                
+def moving_average(data, window_size):  # Function to compute a simple moving average (SMA) 
     return np.convolve(data, np.ones(window_size) / window_size, mode='valid')
-
+    
 
 def exponential_moving_average(data, alpha=0.1):
     ema = [data[0]]  # Initialize EMA with the first value of data
-    for i in range(1, len(data)): ema.append(alpha * data[i] + (1 - alpha) * ema[i - 1])
+    for i in range(1, len(data)):ema.append(alpha * data[i] + (1 - alpha) * ema[i - 1])
     return np.array(ema)
 
 
@@ -413,12 +412,12 @@ def play():
 
     num_games = 50
 
-    new_batch_size = 32  # New batch size
+    new_batch_size = 32  # New batch size                                                                     
 
-    red_agent = Agent(name="red_agent_5_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
+    red_agent = Agent(name="red_agent_03_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
                       batch_size=new_batch_size, eps_dec=1e-3, replace=100)
-    blue_agent = Agent(name="blue_agent_5_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
+    blue_agent = Agent(name="blue_agent_03_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
                        input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
                        batch_size=new_batch_size, eps_dec=1e-3, replace=100)
     agents = {"red_agent": red_agent, "blue_agent": blue_agent}
@@ -426,11 +425,11 @@ def play():
         v.load_models()
 
     # Fine-tuning epsilon for exploitation after training
-    red_agent.epsilon = 0.00
-    blue_agent.epsilon = 0.00
+    red_agent.epsilon = 0.00  
+    blue_agent.epsilon = 0.00  
 
-    # print(f"Epsilon for red_agent during actual game: {red_agent.epsilon}")
-    # print(f"Epsilon for blue_agent during actual game: {blue_agent.epsilon}")
+    # print(f"Epsilon for red_agent during actual game: {red_agent.epsilon}")             
+    # print(f"Epsilon for blue_agent during actual game: {blue_agent.epsilon}")          
 
     scores = {"red_agent": [], "blue_agent": []}
     actions = {"red_agent": [], "blue_agent": []}
@@ -473,7 +472,7 @@ def play():
     print(wins)
     # print(actions)
 
-    # Calculate and plot event usage for Red Agent
+    # Calculate and plot event usage for Red Agent                                                        
     red_agent_event_count = {}
     for game_actions in actions["red_agent"]:
         for event in game_actions:
@@ -503,115 +502,114 @@ def play():
         print(f"Event {event}: {count} times")
 
     # Plot the event usage for Blue Agent
-    plot_event_usage(blue_agent_event_count, 'Blue Agent Event Usage', 'blue_agent_event_usage.png')
+    plot_event_usage(blue_agent_event_count, 'Blue Agent Event Usage', 'blue_agent_event_usage.png') 
 
     # Print event usage by the red agent
-    # print_event_usage(actions)
+    # print_event_usage(actions)                                                                                     
 
 
-# if __name__ == '__main__':
-#     set_seed(42)  # Set seed for reproducibility
-#     env = env_creator.create_env()
-#     num_agents = len(env.possible_agents)
-#     num_actions = env.action_space.n
-#     observation_size = env.observation_space.shape
-#     observation = env.game.observations
-#     max_cycles = env.game.get_max_steps() + 4
-#
-#     num_games = 100000
-#     load_checkpoint = False
-#
-#     new_batch_size = 32
-#
-#     red_agent = Agent(name="red_agent_5_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
-#                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
-#                       batch_size=new_batch_size, eps_dec=1e-4, replace=100)
-#     blue_agent = Agent(name="blue_agent_5_100K", gamma=0.99, epsilon=0.5, lr=5e-6,
-#                        input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
-#                        batch_size=new_batch_size, eps_dec=1e-4, replace=100)
-#     agents = {"red_agent": red_agent, "blue_agent": blue_agent}
-#     if load_checkpoint:
-#         for k, v in agents.items():
-#             v.load_models()
-#
-#     filename = 'DFT-DDQN.png'
-#     scores, eps_history = {}, {}
-#     wins = {"red_agent": 0, "blue_agent": 0}
-#     actions_taken = {"red_agent": [], "blue_agent": []}  # Store actions taken by each agent
-#     for k in agents.keys():
-#         scores[k] = []
-#         eps_history[k] = []
-#
-#     for i in range(num_games):
-#         print("episode ", i)
-#         done = False
-#         observation = env.reset()
-#         score = {}
-#         for k, v in agents.items():
-#             score[k] = 0
-#             actions_taken[k].append([])  # Start a new list for this episode
-#         agent_nn = "red_agent"
-#         while not done:
-#             observation, reward, termination, truncation, info = env.last()
-#             # print(observation)
-#             if termination or truncation:
-#                 action = None
-#                 break
-#             env_agent = env.agent_selection
-#             action_mask = env.game.get_mask(env_agent)
-#             action = agents[agent_nn].choose_action(observation, action_mask)
-#             new_observation, reward, termination, truncation, info = env.step(action)
-#
-#             # Storing the action taken
-#             actions_taken[agent_nn][-1].append(action)  # Append action to the last episode's list
-#
-#             if termination or truncation:
-#                 done = True
-#             score[agent_nn] += reward
-#             agents[agent_nn].store_transition(observation, action, reward, new_observation, done)
-#             agents[agent_nn].learn(i)
-#             agent_nn = "blue_agent" if agent_nn == "red_agent" else "red_agent"
-#         for k in scores.keys():
-#             scores[k].append(score[k])
-#         if env.system.state == 1:
-#             wins["blue_agent"] += 1
-#         else:
-#             wins["red_agent"] += 1
-#
-#         # End of episode processing
-#         for k, agent in agents.items():
-#             agent.end_of_episode()
-#
-#         if i % 1000 == 0:
-#             for k, v in agents.items():
-#                 v.save_models()
-#
-#     save_dir = '5_100K_DFT_MARL-ddqn_analysisGraphs'
-#     plot_loss(red_agent, save_dir, "red_agent")
-#     plot_loss(blue_agent, save_dir, "blue_agent")
-#     plot_loss_avg(red_agent, save_dir, "red_agent")
-#     plot_loss_avg(blue_agent, save_dir, "blue_agent")
-#     # plot_loss_with_smoothing(red_agent, save_dir, "red_agent", window_size=100)
-#     # plot_loss_with_ema(red_agent, save_dir, "red_agent", alpha=0.1)
-#     plot_loss_avg(agent, save_dir, agent_name="AgentName", window_size=10, ema_alpha=0.01)
-#     print(wins)
-#
-#     for k, v in agents.items():
-#         v.save_models()
-#         print_training_event_usage(
-#             v)  # Print event usage after training
-#
-#         # Create and plot event usage for training
-#         training_event_count = {}
-#         for action in v.training_actions:
-#             event_name = training_event_mapping(v.n_actions).get(action, f"Unknown Event {action}")
-#             if event_name in training_event_count:
-#                 training_event_count[event_name] += 1
-#             else:
-#                 training_event_count[event_name] = 1
-#         plot_event_usage(training_event_count, f'{v.name} Training Event Usage', f'{v.name}_training_event_usage.png')
-#
-#     # print(actions_taken)  # Print the actions taken by each agent
-#     # play()
+if __name__ == '__main__':
+    set_seed(42)  # Set seed for reproducibility
+    env = env_creator.create_env()
+    num_agents = len(env.possible_agents)
+    num_actions = env.action_space.n
+    observation_size = env.observation_space.shape
+    observation = env.game.observations
+    max_cycles = env.game.get_max_steps() + 4
+
+    num_games = 100000
+    load_checkpoint = False
+
+    new_batch_size = 32
+
+    red_agent = Agent(name="red_agent_03_100K", gamma=0.99, epsilon=1.0, lr=5e-6,
+                      input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
+                      batch_size=new_batch_size, eps_dec=1e-4, replace=100)
+    blue_agent = Agent(name="blue_agent_03_100K", gamma=0.99, epsilon=1.0, lr=5e-6,
+                       input_dims=observation, n_actions=num_actions, mem_size=1000000, eps_min=0.01,
+                       batch_size=new_batch_size, eps_dec=1e-4, replace=100)
+    agents = {"red_agent": red_agent, "blue_agent": blue_agent}
+    if load_checkpoint:
+        for k, v in agents.items():
+            v.load_models()
+
+    filename = 'DFT-DDQN.png'
+    scores, eps_history = {}, {}
+    wins = {"red_agent": 0, "blue_agent": 0}
+    actions_taken = {"red_agent": [], "blue_agent": []}  # Store actions taken by each agent
+    for k in agents.keys():
+        scores[k] = []
+        eps_history[k] = []
+
+    for i in range(num_games):
+        print("episode ", i)
+        done = False
+        observation = env.reset()
+        score = {}
+        for k, v in agents.items():
+            score[k] = 0
+            actions_taken[k].append([])  # Start a new list for this episode
+        agent_nn = "red_agent"
+        while not done:
+            observation, reward, termination, truncation, info = env.last()
+            # print(observation)
+            if termination or truncation:
+                action = None
+                break
+            env_agent = env.agent_selection
+            action_mask = env.game.get_mask(env_agent)
+            action = agents[agent_nn].choose_action(observation, action_mask)
+            new_observation, reward, termination, truncation, info = env.step(action)
+
+            # Storing the action taken
+            actions_taken[agent_nn][-1].append(action)  # Append action to the last episode's list
+
+            if termination or truncation:
+                done = True
+            score[agent_nn] += reward
+            agents[agent_nn].store_transition(observation, action, reward, new_observation, done)
+            agents[agent_nn].learn(i)
+            agent_nn = "blue_agent" if agent_nn == "red_agent" else "red_agent"
+        for k in scores.keys():
+            scores[k].append(score[k])
+        if env.system.state == 1:
+            wins["blue_agent"] += 1
+        else:
+            wins["red_agent"] += 1
+
+        # End of episode processing
+        for k, agent in agents.items():
+            agent.end_of_episode()
+
+        if i % 1000 == 0:
+            for k, v in agents.items():
+                v.save_models()
+
+    save_dir = 'HD_DFT_MARL-ddqn_analysisGraphs'
+    plot_loss(red_agent, save_dir, "red_agent")
+    plot_loss(blue_agent, save_dir, "blue_agent")
+    plot_loss_avg(red_agent, save_dir, "red_agent")
+    plot_loss_avg(blue_agent, save_dir, "blue_agent")
+    # plot_loss_with_smoothing(red_agent, save_dir, "red_agent", window_size=100)
+    # plot_loss_with_ema(red_agent, save_dir, "red_agent", alpha=0.1)
+    plot_loss_avg(agent, save_dir, agent_name="AgentName", window_size=10, ema_alpha=0.01)
+    print(wins)
+
+    for k, v in agents.items():
+        v.save_models()
+        print_training_event_usage(v)  # Print event usage after training
+
+        # Create and plot event usage for training
+        training_event_count = {}
+        for action in v.training_actions:
+            event_name = training_event_mapping(v.n_actions).get(action, f"Unknown Event {action}")
+            if event_name in training_event_count:
+                training_event_count[event_name] += 1
+            else:
+                training_event_count[event_name] = 1
+        plot_event_usage(training_event_count, f'{v.name} Training Event Usage', f'{v.name}_training_event_usage.png')
+
+    # print(actions_taken)  # Print the actions taken by each agent
+    # play()
 
 play()

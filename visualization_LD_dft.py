@@ -1,3 +1,11 @@
+"""
+File:     visualization_LD_dft.py
+Author:   Ananthu Ramesh S
+Purpose:  To visualize the lower dimensional DFT with simulated fault injection, fault propagation and fault repair.
+          This can be adapted to the real fault scenario to visualize the actual game sequences.
+"""
+
+
 import os
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -5,7 +13,7 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 
-save_dir = '03_100K_DFT_MARL-ddqn_analysisGraphs'
+save_dir = 'HD_DFT_MARL-ddqn_analysisGraphs'
 animation_path = os.path.join(save_dir, 'ld_fault_propagation_animation.gif')
 fig, ax = plt.subplots(figsize=(18, 12))
 
@@ -69,36 +77,6 @@ action_sequence = [
     ("red_agent", "D"), ("blue_agent", "I"),
     ("red_agent", "L"), ("blue_agent", "D"),
     ("red_agent", "No Action"), ("blue_agent", "L"),
-    # ("red_agent", "F"), ("blue_agent", "F"),
-    # ("red_agent", "L"), ("blue_agent", "No Action"),
-    # ("red_agent", "C"), ("blue_agent", "C"),
-    # ("red_agent", "F"), ("blue_agent", "F"),
-    # ("red_agent", "C"), ("blue_agent", "C"),
-    # ("red_agent", "F"), ("blue_agent", "F"),
-    # ("red_agent", "C"), ("blue_agent", "C"),
-    # ("red_agent", "F"), ("blue_agent", "F"),
-    # ("red_agent", "C"), ("blue_agent", "C"),
-    # ("red_agent", "F"), ("blue_agent", "F"),
-    # ("red_agent", "C"), ("blue_agent", "C"),
-    # ("red_agent", "F"), ("blue_agent", "F"),
-    # ("red_agent", "D"), ("blue_agent", "D"),
-    # ("red_agent", "F"), ("blue_agent", "F"),
-    # ("red_agent", "C"), ("blue_agent", "C"),
-    # ("red_agent", "F"), ("blue_agent", "F"),
-    # ("red_agent", "C"), ("blue_agent", "C"),
-    # ("red_agent", "F"), ("blue_agent", "F"),
-    # ("red_agent", "C"), ("blue_agent", "C"),
-    # ("red_agent", "F"), ("blue_agent", "F"),
-    # ("red_agent", "C"), ("blue_agent", "C"),
-    # ("red_agent", "F"), ("blue_agent", "F"),
-    # ("red_agent", "C"), ("blue_agent", "L"),
-    # ("red_agent", "A"), ("blue_agent", "No Action"),
-    # ("red_agent", "K"), ("blue_agent", "C"),
-    # ("red_agent", "L"), ("blue_agent", "No Action"),
-    # ("red_agent", "I"), ("blue_agent", "No Action"),
-    # ("red_agent", "E"), ("blue_agent", "E"),
-    # ("red_agent", "B"), ("blue_agent", "No Action"),
-    # ("red_agent", "G")
 ]
 
 

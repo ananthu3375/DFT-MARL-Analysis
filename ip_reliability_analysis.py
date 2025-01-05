@@ -288,6 +288,6 @@ if __name__ == "__main__":
     ax2.grid(False)
 
     plt.title("Improvement Potentials and Event Usages for Each Basic Event")
-    save_dir = '2_100K_DFT_MARL-ddqn_analysisGraphs'
+    save_dir = 'LD_DFT_MARL-ddqn_analysisGraphs'
     plt.savefig(f"{save_dir}/improvement_potentials_event_usages.png", bbox_inches='tight')
     # plt.show()

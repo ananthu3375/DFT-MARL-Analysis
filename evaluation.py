@@ -298,7 +298,7 @@ def calculate_and_plot_event_usage(actions):
     plt.xticks([i + bar_width / 2 for i in index], all_events, rotation=45)
     plt.legend()
     plt.tight_layout()
-    save_dir = '03_100K_DFT_MARL-ddqn_analysisGraphs'
+    save_dir = 'HD_DFT_MARL-ddqn_analysisGraphs'
     os.makedirs(save_dir, exist_ok=True)
     file_path = os.path.join(save_dir, 'game_event_usage.png')
     plt.savefig(file_path, format='png')
@@ -316,7 +316,7 @@ def actual_game():
     max_cycles = env.game.get_max_steps() + 4
 
     # Set the number of evaluation games
-    num_games = 500
+    num_games = 5000
 
     # Load the saved models for both agents (red and blue)
     red_agent = Agent(name="red_agent_03_100K", gamma=0.99, epsilon=1.0, lr=5e-6,
@@ -441,7 +441,7 @@ def actual_game():
 
     print(f"\n\nScores: {scores}")
     print(f"\n\nWins: {wins}")
-    # print(f"\n\nActions: {actions}")
+    print(f"\n\nActions: {actions}")
     print(f"\n\nSystem States for Red Agent: {red_system_states}")
     print(f"\n\nSystem States for Blue Agent: {blue_system_states}")
 

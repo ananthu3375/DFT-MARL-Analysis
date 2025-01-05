@@ -1,3 +1,11 @@
+"""
+File:     visualization_HD_dft.py
+Author:   Ananthu Ramesh S
+Purpose:  To visualize the higher dimensional DFT with simulated fault injection, fault propagation and fault repair.
+          This can be adapted to the real fault scenario to visualize the actual game sequences.
+"""
+
+
 import os
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -5,7 +13,7 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 
-save_dir = '03_100K_DFT_MARL-ddqn_analysisGraphs'
+save_dir = 'HD_DFT_MARL-ddqn_analysisGraphs'
 animation_path = os.path.join(save_dir, 'hd_fault_propagation_animation.gif')
 fig, ax = plt.subplots(figsize=(14, 12))
 
