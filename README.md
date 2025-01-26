@@ -9,26 +9,26 @@ The study further evaluates the critical events and introduces modifications to 
 ---
 
 ## **Project Overview**
-<img src="HD_DFT_MARL-ddqn_analysisGraphs/Project_Overview_pptFinal.png" width="300"/>
+<img src="HD_DFT_MARL-ddqn_analysisGraphs/Project_Overview_pptFinal.png" width="500"/>
 
 ---
 
 ## **Lower Dimensional DFT**
-![LD_DFT](https://github.com/user-attachments/assets/7dcbfe7a-ebaa-4175-a9d6-c7387aaff304)
+<img src="https://github.com/user-attachments/assets/7dcbfe7a-ebaa-4175-a9d6-c7387aaff304" width="500"/>
 
 ---
 
 ## **Higher Dimensional DFT**
-![HD_DFT](https://github.com/user-attachments/assets/979e9f3e-eba2-43bd-846c-bac5251c1ca6)
+<img src="https://github.com/user-attachments/assets/979e9f3e-eba2-43bd-846c-bac5251c1ca6" width="500"/>
 
 ---
 
 ## **Simulated Fault Propagation in the Lower Dimensional DFT**
-![ld_fault_propagation_animation](https://github.com/user-attachments/assets/e9621695-e441-47c5-8334-77bb45439849)
+<img src="https://github.com/user-attachments/assets/e9621695-e441-47c5-8334-77bb45439849" width="500"/>
 
 ---
 
 ## **Simulated Fault Propagation in the Higher Dimensional (Improved) DFT**
-![hd_fault_propagation_animation](https://github.com/user-attachments/assets/cec4dbb5-ceea-4394-af62-a7c31229d7a5)
+<img src="https://github.com/user-attachments/assets/cec4dbb5-ceea-4394-af62-a7c31229d7a5" width="500"/>
 
 ---
