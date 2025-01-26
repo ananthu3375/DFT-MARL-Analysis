@@ -8,7 +8,12 @@ The study further evaluates the critical events and introduces modifications to 
 
 ---
 
-## **Lower Dimensional DFT** 
+## **Project Overview**
+![Project_Overview_pptFinal.png](..%2F..%2FDesktop%2FANANTHU%2F0_Uni-Stuttgart%2F1_Research%20Project%2F1_Important%20Docs%2F1_Pictures%20Finalised%2FFinalized_Pictures%2FProject_Overview_pptFinal.png)
+
+---
+
+## **Lower Dimensional DFT**
 ![LD_DFT](https://github.com/user-attachments/assets/7dcbfe7a-ebaa-4175-a9d6-c7387aaff304)
 
 ---
