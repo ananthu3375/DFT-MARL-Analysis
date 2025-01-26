@@ -9,7 +9,7 @@ The study further evaluates the critical events and introduces modifications to 
 ---
 
 ## **Project Overview**
-![Project_Overview_pptFinal.png](HD_DFT_MARL-ddqn_analysisGraphs%2FProject_Overview_pptFinal.png)
+<img src="HD_DFT_MARL-ddqn_analysisGraphs/Project_Overview_pptFinal.png" width="300"/>
 
 ---
 
