@@ -6,14 +6,14 @@ The adversarial agents interact in a turn-based sequence, with rewards structure
 
 The study further evaluates the critical events and introduces modifications to the initial DFT model structure to see how system performance can be enhanced through targeted interventions. The agents are retrained over the new DFT, and the results are analyzed to understand the importance of improvements in system fault tolerance. Redundancy and parameter adjustments have a significant impact on the fault tolerance of a system. The results confirm the proposed method significantly improves system reliability by making it more tolerant to adversarial faults. Moreover, the game win percentage shows improvement over the modified DFT, which implies that the Adversarial Multi-Agent Reinforcement Learning framework can be implemented to identify critical components in a system. Improving the identified critical events enhances system reliability. Ultimately, this work underscores the potential of combining reinforcement learning with DFT modeling for more effective system risk management and provides a foundation for future developments in system reliability engineering.
 
-### **Lower Dimensional DFT** 
+## **Lower Dimensional DFT** 
 ![LD_DFT](https://github.com/user-attachments/assets/7dcbfe7a-ebaa-4175-a9d6-c7387aaff304)
 
-### **Higher Dimensional DFT**
+## **Higher Dimensional DFT**
 ![HD_DFT](https://github.com/user-attachments/assets/979e9f3e-eba2-43bd-846c-bac5251c1ca6)
 
-### **Simulated Fault Propagation in the Lower Dimensional DFT**
+## **Simulated Fault Propagation in the Lower Dimensional DFT**
 ![ld_fault_propagation_animation](https://github.com/user-attachments/assets/e9621695-e441-47c5-8334-77bb45439849)
 
-### **Simulated Fault Propagation in the Higher Dimensional (Improved) DFT**
+## **Simulated Fault Propagation in the Higher Dimensional (Improved) DFT**
 ![hd_fault_propagation_animation](https://github.com/user-attachments/assets/cec4dbb5-ceea-4394-af62-a7c31229d7a5)
